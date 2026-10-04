@@ -15,12 +15,11 @@ source.dir = .
 # (list) Source files to include (let empty to include all the files)
 source.include_exts = py,png,jpg,kv,atlas,db
 
-# (str) Application versioning (method 1)
+# (str) Application versioning
 version = 1.0.0
 
 # (list) Application requirements
-# comma separated e.g. requirements = sqlite3,kivy
-requirements = python3,kivy,sqlite3,urllib3
+requirements = python3,kivy
 
 # (str) Supported orientation (one of landscape, sensorLandscape, portrait or all)
 orientation = portrait
@@ -31,26 +30,20 @@ fullscreen = 0
 # (list) Permissions
 android.permissions = INTERNET
 
-# (int) Target Android API, should be as high as possible.
+# (int) Target Android API
 android.api = 33
 
-# (int) Minimum API your APK / AAB will support.
+# (int) Minimum API your APK / AAB will support
 android.minapi = 21
 
 # (str) Android NDK version to use
 android.ndk = 25b
 
-# (bool) If True, then skip trying to update the Android sdk
-# This can be useful to avoid excess Internet downloads or save time
-# when an update is due and you just want to test/build your package
-android.skip_update = False
-
-# (bool) If True, then automatically accept the SDK license
-# agreements. This is intended for automation only.
+# (bool) If True, then automatically accept the SDK license agreements
 android.accept_sdk_license = True
 
-# (list) The Android archs to build for, choices: armeabi-v7a, arm64-v8a, x86, x86_64
-android.archs = arm64-v8a, armeabi-v7a
+# (list) The Android archs to build for (arm64-v8a covers all modern Android phones)
+android.archs = arm64-v8a
 
 # (bool) enables Android auto backup feature (Android API >=23)
 android.allow_backup = True
