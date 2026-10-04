@@ -3,9 +3,11 @@ SplitExpense Mobile - Android Application
 =========================================
 Built with Kivy for Android deployment via Buildozer.
 Features:
-- Dark Mode Mobile Ambience
+- Standard Android Aspect Ratio & Adaptive DPI Scaling (dp/sp)
+- Safe Area Padding for Android Status Bar & Gesture Navigation
+- Dark Mode Mobile Ambience (#0F172A)
 - Groups & Members Management
-- Smart Allocation Modes (Full to One, Paid for Others, Shared Equally, Exact)
+- Smart Allocation Modes (Full to One, Paid for Others, Shared Equally)
 - True Added (+) and Subtracted (-) Net Balances
 - Debt Simplification Algorithm (Min Cash Flow)
 - 1-Tap WhatsApp, SMS, and UPI Payment Intent Triggers
@@ -23,12 +25,11 @@ import kivy
 from kivy.app import App
 from kivy.core.window import Window
 from kivy.graphics import Color, Rectangle, RoundedRectangle
+from kivy.metrics import dp, sp
 from kivy.uix.boxlayout import BoxLayout
 from kivy.uix.button import Button
-from kivy.uix.checkbox import CheckBox
 from kivy.uix.gridlayout import GridLayout
 from kivy.uix.label import Label
-from kivy.uix.popup import Popup
 from kivy.uix.screenmanager import Screen, ScreenManager
 from kivy.uix.scrollview import ScrollView
 from kivy.uix.spinner import Spinner
@@ -266,7 +267,7 @@ class MobileDatabase:
 
 
 # ============================================================================
-# UI COMPONENTS & SCREENS
+# UI COMPONENTS (DPI-SCALED FOR ANDROID)
 # ============================================================================
 
 class DarkButton(Button):
@@ -276,24 +277,37 @@ class DarkButton(Button):
         self.background_color = bg_col
         self.color = TEXT_WHITE
         self.bold = True
-        self.font_size = "15sp"
+        self.font_size = sp(14)
 
 
 class DarkCard(BoxLayout):
     def __init__(self, bg_col=CARD_DARK, **kwargs):
         super().__init__(**kwargs)
         self.orientation = "vertical"
-        self.padding = [12, 10]
-        self.spacing = 6
+        self.padding = [dp(14), dp(12)]
+        self.spacing = dp(6)
         with self.canvas.before:
             Color(*bg_col)
-            self.rect = RoundedRectangle(pos=self.pos, size=self.size, radius=[8])
+            self.rect = RoundedRectangle(pos=self.pos, size=self.size, radius=[dp(10)])
         self.bind(pos=self._update_rect, size=self._update_rect)
 
     def _update_rect(self, *args):
         self.rect.pos = self.pos
         self.rect.size = self.size
 
+
+class ResponsiveLabel(Label):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.bind(width=self._update_text_width)
+
+    def _update_text_width(self, *args):
+        self.text_size = (self.width, None)
+
+
+# ============================================================================
+# SCREENS WITH STANDARDIZED MOBILE ASPECT RATIOS
+# ============================================================================
 
 class DashboardScreen(Screen):
     def __init__(self, db: MobileDatabase, **kwargs):
@@ -302,17 +316,19 @@ class DashboardScreen(Screen):
         self._build_ui()
 
     def _build_ui(self):
-        root = BoxLayout(orientation="vertical", padding=10, spacing=10)
+        root = BoxLayout(orientation="vertical", padding=[dp(12), dp(8)], spacing=dp(10))
 
-        # Header
-        hdr = DarkCard(bg_col=CARD_DARK, size_hint_y=None, height=65)
-        hdr.add_widget(Label(text="⚡ SplitExpense", font_size="20sp", bold=True, color=ACCENT_CYAN, halign="left"))
-        hdr.add_widget(Label(text="Dark Mode Mobile • Added & Subtracted Balances", font_size="11sp", color=TEXT_MUTED))
+        # Header Card
+        hdr = DarkCard(bg_col=CARD_DARK, size_hint_y=None, height=dp(70))
+        lbl_title = ResponsiveLabel(text="⚡ SplitExpense", font_size=sp(20), bold=True, color=ACCENT_CYAN, halign="left", valign="middle")
+        lbl_sub = ResponsiveLabel(text="Mobile Dark Ambience • True Added & Subtracted Balances", font_size=sp(11), color=TEXT_MUTED, halign="left", valign="middle")
+        hdr.add_widget(lbl_title)
+        hdr.add_widget(lbl_sub)
         root.add_widget(hdr)
 
-        # Scrollable content
-        scroll = ScrollView(do_scroll_x=False)
-        self.content_layout = BoxLayout(orientation="vertical", spacing=10, size_hint_y=None)
+        # Scrollable Viewport
+        scroll = ScrollView(do_scroll_x=False, bar_width=dp(4))
+        self.content_layout = BoxLayout(orientation="vertical", spacing=dp(10), size_hint_y=None)
         self.content_layout.bind(minimum_height=self.content_layout.setter("height"))
         scroll.add_widget(self.content_layout)
         root.add_widget(scroll)
@@ -332,45 +348,52 @@ class DashboardScreen(Screen):
         total_spent = sum(e["amount"] for e in expenses)
 
         # KPI Summary Card
-        kpi_card = DarkCard(size_hint_y=None, height=90)
-        kpi_card.add_widget(Label(text="Total Group Spending", font_size="12sp", color=TEXT_MUTED))
-        kpi_card.add_widget(Label(text=f"₹{total_spent:,.2f}", font_size="24sp", bold=True, color=ACCENT_CYAN))
-        kpi_card.add_widget(Label(text=f"{len(expenses)} expenses • {len(debts)} pending settlements", font_size="11sp", color=TEXT_MUTED))
+        kpi_card = DarkCard(size_hint_y=None, height=dp(96))
+        kpi_card.add_widget(ResponsiveLabel(text="Total Group Spending", font_size=sp(12), color=TEXT_MUTED, halign="left"))
+        kpi_card.add_widget(ResponsiveLabel(text=f"₹{total_spent:,.2f}", font_size=sp(24), bold=True, color=ACCENT_CYAN, halign="left"))
+        kpi_card.add_widget(ResponsiveLabel(text=f"{len(expenses)} expenses logged • {len(debts)} pending settlements", font_size=sp(11), color=TEXT_MUTED, halign="left"))
         self.content_layout.add_widget(kpi_card)
 
         # Member Net Balances Header
-        self.content_layout.add_widget(Label(text="Member Net Balances", font_size="15sp", bold=True, color=ACCENT_CYAN, size_hint_y=None, height=30))
+        self.content_layout.add_widget(ResponsiveLabel(
+            text="Member Net Balances", font_size=sp(15), bold=True, color=ACCENT_CYAN, size_hint_y=None, height=dp(30), halign="left"
+        ))
 
         for b in balances:
-            card = DarkCard(size_hint_y=None, height=75)
-            row = BoxLayout(orientation="horizontal")
-            info = BoxLayout(orientation="vertical")
-            info.add_widget(Label(text=b["name"], font_size="14sp", bold=True, color=TEXT_WHITE, halign="left"))
-            info.add_widget(Label(text=f"Paid: +₹{b['total_paid']:.0f}  |  Share: -₹{b['total_owed']:.0f}", font_size="11sp", color=TEXT_MUTED))
+            card = DarkCard(size_hint_y=None, height=dp(80))
+            row = BoxLayout(orientation="horizontal", spacing=dp(8))
+            info = BoxLayout(orientation="vertical", spacing=dp(2))
+            info.add_widget(ResponsiveLabel(text=b["name"], font_size=sp(14), bold=True, color=TEXT_WHITE, halign="left"))
+            info.add_widget(ResponsiveLabel(text=f"Paid: +₹{b['total_paid']:.0f}  |  Share: -₹{b['total_owed']:.0f}", font_size=sp(11), color=TEXT_MUTED, halign="left"))
             row.add_widget(info)
 
             net = b["net"]
             net_col = ACCENT_GREEN if net > 0 else (ACCENT_ROSE if net < 0 else TEXT_MUTED)
             sign = "+" if net > 0 else ""
             status = f"Gets back {sign}₹{net:.2f}" if net > 0 else (f"Owes ₹{-net:.2f}" if net < 0 else "Settled")
-            row.add_widget(Label(text=status, font_size="13sp", bold=True, color=net_col, size_hint_x=0.45))
+            row.add_widget(ResponsiveLabel(text=status, font_size=sp(13), bold=True, color=net_col, size_hint_x=0.48, halign="right", valign="middle"))
 
             card.add_widget(row)
             self.content_layout.add_widget(card)
 
         # Simplified Debts
-        self.content_layout.add_widget(Label(text="Simplified Settlements (Who Pays Whom)", font_size="15sp", bold=True, color=ACCENT_AMBER, size_hint_y=None, height=30))
+        self.content_layout.add_widget(ResponsiveLabel(
+            text="Simplified Settlements (Who Pays Whom)", font_size=sp(15), bold=True, color=ACCENT_AMBER, size_hint_y=None, height=dp(30), halign="left"
+        ))
 
         if not debts:
-            no_debt = DarkCard(size_hint_y=None, height=45)
-            no_debt.add_widget(Label(text="✓ All balances are settled up!", color=ACCENT_GREEN, font_size="13sp"))
+            no_debt = DarkCard(size_hint_y=None, height=dp(48))
+            no_debt.add_widget(ResponsiveLabel(text="✓ All balances are settled up!", color=ACCENT_GREEN, font_size=sp(13), halign="center"))
             self.content_layout.add_widget(no_debt)
         else:
             for d in debts:
-                d_card = DarkCard(size_hint_y=None, height=95)
-                d_card.add_widget(Label(text=f"{d['from_name']}  ➔  {d['to_name']} : ₹{d['amount']:.2f}", font_size="14sp", bold=True, color=TEXT_WHITE))
+                d_card = DarkCard(size_hint_y=None, height=dp(106))
+                d_card.add_widget(ResponsiveLabel(
+                    text=f"{d['from_name']}  ➔  {d['to_name']} : ₹{d['amount']:.2f}",
+                    font_size=sp(14), bold=True, color=TEXT_WHITE, halign="left"
+                ))
 
-                btn_row = BoxLayout(orientation="horizontal", spacing=8, size_hint_y=None, height=36)
+                btn_row = BoxLayout(orientation="horizontal", spacing=dp(8), size_hint_y=None, height=dp(40))
 
                 wa_btn = DarkButton(text="💬 WhatsApp", bg_col=ACCENT_GREEN)
                 wa_btn.bind(on_release=lambda btn, debt=d: self.send_whatsapp_reminder(debt))
@@ -427,48 +450,57 @@ class AddExpenseScreen(Screen):
         self._build_ui()
 
     def _build_ui(self):
-        root = BoxLayout(orientation="vertical", padding=12, spacing=8)
+        root = BoxLayout(orientation="vertical", padding=[dp(12), dp(8)], spacing=dp(10))
 
-        root.add_widget(Label(text="➕ Add New Expense", font_size="18sp", bold=True, color=ACCENT_CYAN, size_hint_y=None, height=35))
+        root.add_widget(ResponsiveLabel(
+            text="➕ Add New Expense", font_size=sp(18), bold=True, color=ACCENT_CYAN, size_hint_y=None, height=dp(36), halign="left"
+        ))
 
-        # Form Card
-        form = DarkCard()
+        scroll = ScrollView(do_scroll_x=False, bar_width=dp(4))
+        scroll_content = BoxLayout(orientation="vertical", spacing=dp(10), size_hint_y=None)
+        scroll_content.bind(minimum_height=scroll_content.setter("height"))
+
+        form = DarkCard(size_hint_y=None)
+        form.bind(minimum_height=form.setter("height"))
 
         # Description
-        form.add_widget(Label(text="Expense Description:", font_size="12sp", color=TEXT_MUTED, size_hint_y=None, height=20))
-        self.desc_input = TextInput(hint_text="e.g. Dinner, Fuel, Groceries", multiline=False, size_hint_y=None, height=38, background_color=INPUT_DARK, foreground_color=TEXT_WHITE)
+        form.add_widget(ResponsiveLabel(text="Expense Description:", font_size=sp(12), color=TEXT_MUTED, size_hint_y=None, height=dp(22), halign="left"))
+        self.desc_input = TextInput(hint_text="e.g. Dinner, Fuel, Groceries", multiline=False, size_hint_y=None, height=dp(42), font_size=sp(14), background_color=INPUT_DARK, foreground_color=TEXT_WHITE)
         form.add_widget(self.desc_input)
 
         # Amount
-        form.add_widget(Label(text="Total Amount (₹):", font_size="12sp", color=TEXT_MUTED, size_hint_y=None, height=20))
-        self.amt_input = TextInput(hint_text="0.00", multiline=False, size_hint_y=None, height=38, input_filter="float", background_color=INPUT_DARK, foreground_color=TEXT_WHITE)
+        form.add_widget(ResponsiveLabel(text="Total Amount (₹):", font_size=sp(12), color=TEXT_MUTED, size_hint_y=None, height=dp(22), halign="left"))
+        self.amt_input = TextInput(hint_text="0.00", multiline=False, size_hint_y=None, height=dp(42), font_size=sp(14), input_filter="float", background_color=INPUT_DARK, foreground_color=TEXT_WHITE)
         form.add_widget(self.amt_input)
 
         # Paid By
-        form.add_widget(Label(text="Paid By:", font_size="12sp", color=TEXT_MUTED, size_hint_y=None, height=20))
-        self.payer_spinner = Spinner(text="Select Payer", values=[], size_hint_y=None, height=38, background_color=BORDER_COLOR, color=TEXT_WHITE)
+        form.add_widget(ResponsiveLabel(text="Paid By:", font_size=sp(12), color=TEXT_MUTED, size_hint_y=None, height=dp(22), halign="left"))
+        self.payer_spinner = Spinner(text="Select Payer", values=[], size_hint_y=None, height=dp(42), font_size=sp(14), background_color=BORDER_COLOR, color=TEXT_WHITE)
         form.add_widget(self.payer_spinner)
 
         # Allocation Mode
-        form.add_widget(Label(text="How is this split / allocated?", font_size="12sp", color=TEXT_MUTED, size_hint_y=None, height=20))
+        form.add_widget(ResponsiveLabel(text="How is this split / allocated?", font_size=sp(12), color=TEXT_MUTED, size_hint_y=None, height=dp(22), halign="left"))
         self.mode_spinner = Spinner(
             text="🍕 Shared (Include Payer)",
             values=["🎯 Full Amount to One Person", "👥 Paid for Others (Exclude Payer)", "🍕 Shared (Include Payer)"],
-            size_hint_y=None, height=38, background_color=BORDER_COLOR, color=TEXT_WHITE
+            size_hint_y=None, height=dp(42), font_size=sp(13), background_color=BORDER_COLOR, color=TEXT_WHITE
         )
         form.add_widget(self.mode_spinner)
 
-        # Borrower / Target Person (if Full Amount to One)
-        form.add_widget(Label(text="If Full Amount, select Borrower:", font_size="12sp", color=TEXT_MUTED, size_hint_y=None, height=20))
-        self.borrower_spinner = Spinner(text="Select Borrower", values=[], size_hint_y=None, height=38, background_color=BORDER_COLOR, color=TEXT_WHITE)
+        # Target Borrower (for Full to One)
+        form.add_widget(ResponsiveLabel(text="If Full Amount, select Borrower:", font_size=sp(12), color=TEXT_MUTED, size_hint_y=None, height=dp(22), halign="left"))
+        self.borrower_spinner = Spinner(text="Select Borrower", values=[], size_hint_y=None, height=dp(42), font_size=sp(14), background_color=BORDER_COLOR, color=TEXT_WHITE)
         form.add_widget(self.borrower_spinner)
 
-        root.add_widget(form)
+        scroll_content.add_widget(form)
 
         # Save Button
-        save_btn = DarkButton(text="💾 Save Expense", bg_col=ACCENT_GREEN, size_hint_y=None, height=48)
+        save_btn = DarkButton(text="💾 Save Expense", bg_col=ACCENT_GREEN, size_hint_y=None, height=dp(50))
         save_btn.bind(on_release=self.save_expense)
-        root.add_widget(save_btn)
+        scroll_content.add_widget(save_btn)
+
+        scroll.add_widget(scroll_content)
+        root.add_widget(scroll)
 
         self.add_widget(root)
 
@@ -516,14 +548,12 @@ class AddExpenseScreen(Screen):
                 for oid in others:
                     splits.append((oid, share))
         else:
-            # Shared equally
             share = round(amt / len(members), 2)
             for m in members:
                 splits.append((m["id"], share))
 
         self.db.add_expense(None, desc, amt, payer_id, mode_text, splits)
 
-        # Clear inputs & switch
         self.desc_input.text = ""
         self.amt_input.text = ""
         self.manager.current = "dashboard"
@@ -536,11 +566,11 @@ class ExpensesHistoryScreen(Screen):
         self._build_ui()
 
     def _build_ui(self):
-        root = BoxLayout(orientation="vertical", padding=10, spacing=8)
-        root.add_widget(Label(text="📜 Expenses History", font_size="18sp", bold=True, color=ACCENT_CYAN, size_hint_y=None, height=35))
+        root = BoxLayout(orientation="vertical", padding=[dp(12), dp(8)], spacing=dp(10))
+        root.add_widget(ResponsiveLabel(text="📜 Expenses History", font_size=sp(18), bold=True, color=ACCENT_CYAN, size_hint_y=None, height=dp(36), halign="left"))
 
-        scroll = ScrollView(do_scroll_x=False)
-        self.list_layout = BoxLayout(orientation="vertical", spacing=8, size_hint_y=None)
+        scroll = ScrollView(do_scroll_x=False, bar_width=dp(4))
+        self.list_layout = BoxLayout(orientation="vertical", spacing=dp(8), size_hint_y=None)
         self.list_layout.bind(minimum_height=self.list_layout.setter("height"))
         scroll.add_widget(self.list_layout)
         root.add_widget(scroll)
@@ -555,21 +585,21 @@ class ExpensesHistoryScreen(Screen):
         expenses = self.db.get_expenses()
 
         if not expenses:
-            c = DarkCard(size_hint_y=None, height=45)
-            c.add_widget(Label(text="No expenses logged yet.", color=TEXT_MUTED))
+            c = DarkCard(size_hint_y=None, height=dp(50))
+            c.add_widget(ResponsiveLabel(text="No expenses logged yet.", color=TEXT_MUTED, halign="center"))
             self.list_layout.add_widget(c)
             return
 
         for exp in expenses:
-            card = DarkCard(size_hint_y=None, height=75)
-            row = BoxLayout(orientation="horizontal")
+            card = DarkCard(size_hint_y=None, height=dp(80))
+            row = BoxLayout(orientation="horizontal", spacing=dp(8))
 
-            info = BoxLayout(orientation="vertical")
-            info.add_widget(Label(text=f"{exp['description']} (₹{exp['amount']:.2f})", font_size="14sp", bold=True, color=TEXT_WHITE))
-            info.add_widget(Label(text=f"Paid by {exp.get('payer_name','')} • {exp['date']}", font_size="11sp", color=TEXT_MUTED))
+            info = BoxLayout(orientation="vertical", spacing=dp(2))
+            info.add_widget(ResponsiveLabel(text=f"{exp['description']} (₹{exp['amount']:.2f})", font_size=sp(14), bold=True, color=TEXT_WHITE, halign="left"))
+            info.add_widget(ResponsiveLabel(text=f"Paid by {exp.get('payer_name','')} • {exp['date']}", font_size=sp(11), color=TEXT_MUTED, halign="left"))
             row.add_widget(info)
 
-            del_btn = DarkButton(text="🗑 Delete", bg_col=ACCENT_ROSE, size_hint_x=0.3)
+            del_btn = DarkButton(text="🗑 Delete", bg_col=ACCENT_ROSE, size_hint_x=0.32)
             del_btn.bind(on_release=lambda btn, eid=exp["id"]: self.delete_expense(eid))
             row.add_widget(del_btn)
 
@@ -588,30 +618,30 @@ class MembersScreen(Screen):
         self._build_ui()
 
     def _build_ui(self):
-        root = BoxLayout(orientation="vertical", padding=10, spacing=8)
-        root.add_widget(Label(text="👥 Members Directory", font_size="18sp", bold=True, color=ACCENT_CYAN, size_hint_y=None, height=35))
+        root = BoxLayout(orientation="vertical", padding=[dp(12), dp(8)], spacing=dp(10))
+        root.add_widget(ResponsiveLabel(text="👥 Members Directory", font_size=sp(18), bold=True, color=ACCENT_CYAN, size_hint_y=None, height=dp(36), halign="left"))
 
         # Add Member Form
-        add_box = DarkCard(size_hint_y=None, height=135)
-        add_box.add_widget(Label(text="Add New Member:", font_size="12sp", bold=True, color=ACCENT_CYAN))
+        add_box = DarkCard(size_hint_y=None, height=dp(175))
+        add_box.add_widget(ResponsiveLabel(text="Add New Member:", font_size=sp(12), bold=True, color=ACCENT_CYAN, halign="left"))
 
-        self.name_input = TextInput(hint_text="Full Name", multiline=False, size_hint_y=None, height=32, background_color=INPUT_DARK, foreground_color=TEXT_WHITE)
-        self.phone_input = TextInput(hint_text="Phone (e.g. +919876543210)", multiline=False, size_hint_y=None, height=32, background_color=INPUT_DARK, foreground_color=TEXT_WHITE)
-        self.upi_input = TextInput(hint_text="UPI ID (e.g. name@okhdfc)", multiline=False, size_hint_y=None, height=32, background_color=INPUT_DARK, foreground_color=TEXT_WHITE)
+        self.name_input = TextInput(hint_text="Full Name", multiline=False, size_hint_y=None, height=dp(38), font_size=sp(13), background_color=INPUT_DARK, foreground_color=TEXT_WHITE)
+        self.phone_input = TextInput(hint_text="Phone (e.g. +919876543210)", multiline=False, size_hint_y=None, height=dp(38), font_size=sp(13), background_color=INPUT_DARK, foreground_color=TEXT_WHITE)
+        self.upi_input = TextInput(hint_text="UPI ID (e.g. name@okhdfc)", multiline=False, size_hint_y=None, height=dp(38), font_size=sp(13), background_color=INPUT_DARK, foreground_color=TEXT_WHITE)
 
         add_box.add_widget(self.name_input)
         add_box.add_widget(self.phone_input)
         add_box.add_widget(self.upi_input)
 
-        add_btn = DarkButton(text="➕ Add Member", bg_col=ACCENT_GREEN, size_hint_y=None, height=36)
+        add_btn = DarkButton(text="➕ Add Member", bg_col=ACCENT_GREEN, size_hint_y=None, height=dp(42))
         add_btn.bind(on_release=self.add_member)
         add_box.add_widget(add_btn)
 
         root.add_widget(add_box)
 
         # Members List
-        scroll = ScrollView(do_scroll_x=False)
-        self.mem_layout = BoxLayout(orientation="vertical", spacing=6, size_hint_y=None)
+        scroll = ScrollView(do_scroll_x=False, bar_width=dp(4))
+        self.mem_layout = BoxLayout(orientation="vertical", spacing=dp(6), size_hint_y=None)
         self.mem_layout.bind(minimum_height=self.mem_layout.setter("height"))
         scroll.add_widget(self.mem_layout)
         root.add_widget(scroll)
@@ -624,9 +654,9 @@ class MembersScreen(Screen):
     def refresh(self):
         self.mem_layout.clear_widgets()
         for m in self.db.get_members():
-            c = DarkCard(size_hint_y=None, height=55)
-            c.add_widget(Label(text=f"{m['name']}  ({m.get('phone') or 'No phone'})", font_size="13sp", bold=True, color=TEXT_WHITE))
-            c.add_widget(Label(text=f"UPI: {m.get('upi_id') or 'None'}", font_size="11sp", color=TEXT_MUTED))
+            c = DarkCard(size_hint_y=None, height=dp(60))
+            c.add_widget(ResponsiveLabel(text=f"{m['name']}  ({m.get('phone') or 'No phone'})", font_size=sp(13), bold=True, color=TEXT_WHITE, halign="left"))
+            c.add_widget(ResponsiveLabel(text=f"UPI: {m.get('upi_id') or 'None'}", font_size=sp(11), color=TEXT_MUTED, halign="left"))
             self.mem_layout.add_widget(c)
 
     def add_member(self, *args):
@@ -642,20 +672,27 @@ class MembersScreen(Screen):
 
 
 # ============================================================================
-# MAIN APPLICATION
+# MAIN APPLICATION (ADAPTIVE ANDROID LAYOUT)
 # ============================================================================
 
 class SplitExpenseMobileApp(App):
     def build(self):
         Window.clearcolor = BG_DARK
-        self.title = "SplitExpense Mobile"
+        self.title = "SplitExpense"
 
         db_path = os.path.join(self.user_data_dir, "splitexpense.db")
         self.db = MobileDatabase(db_path)
 
-        main_box = BoxLayout(orientation="vertical")
+        # Standard Android layout container with safe-area spacing
+        # dp(24) top padding protects the top status bar / notch
+        # dp(12) bottom padding protects Android gesture pill / navigation bar
+        main_box = BoxLayout(
+            orientation="vertical",
+            padding=[dp(8), dp(24), dp(8), dp(12)],
+            spacing=dp(6)
+        )
 
-        # Screen Manager
+        # Screen Manager (fills dynamic height)
         self.sm = ScreenManager()
         self.sm.add_widget(DashboardScreen(self.db, name="dashboard"))
         self.sm.add_widget(AddExpenseScreen(self.db, name="add_expense"))
@@ -663,30 +700,33 @@ class SplitExpenseMobileApp(App):
         self.sm.add_widget(MembersScreen(self.db, name="members"))
         main_box.add_widget(self.sm)
 
-        # Bottom Mobile Navigation Bar
-        nav = BoxLayout(orientation="horizontal", size_hint_y=None, height=54, spacing=2)
+        # Bottom Android Navigation Bar (ergonomic touch target height: dp(56))
+        nav = BoxLayout(orientation="horizontal", size_hint_y=None, height=dp(56), spacing=dp(4))
 
-        btn_dash = DarkButton(text="📊 Balances", bg_col=CARD_DARK)
-        btn_dash.bind(on_release=lambda b: self.switch_screen("dashboard"))
-        nav.add_widget(btn_dash)
+        self.btn_dash = DarkButton(text="📊 Balances", bg_col=ACCENT_CYAN)
+        self.btn_dash.bind(on_release=lambda b: self.switch_screen("dashboard"))
+        nav.add_widget(self.btn_dash)
 
-        btn_add = DarkButton(text="➕ Add", bg_col=ACCENT_GREEN)
-        btn_add.bind(on_release=lambda b: self.switch_screen("add_expense"))
-        nav.add_widget(btn_add)
+        self.btn_add = DarkButton(text="➕ Add", bg_col=CARD_DARK)
+        self.btn_add.bind(on_release=lambda b: self.switch_screen("add_expense"))
+        nav.add_widget(self.btn_add)
 
-        btn_hist = DarkButton(text="📜 History", bg_col=CARD_DARK)
-        btn_hist.bind(on_release=lambda b: self.switch_screen("history"))
-        nav.add_widget(btn_hist)
+        self.btn_hist = DarkButton(text="📜 History", bg_col=CARD_DARK)
+        self.btn_hist.bind(on_release=lambda b: self.switch_screen("history"))
+        nav.add_widget(self.btn_hist)
 
-        btn_mem = DarkButton(text="👥 Members", bg_col=CARD_DARK)
-        btn_mem.bind(on_release=lambda b: self.switch_screen("members"))
-        nav.add_widget(btn_mem)
+        self.btn_mem = DarkButton(text="👥 Members", bg_col=CARD_DARK)
+        self.btn_mem.bind(on_release=lambda b: self.switch_screen("members"))
+        nav.add_widget(self.btn_mem)
 
         main_box.add_widget(nav)
         return main_box
 
     def switch_screen(self, screen_name):
         self.sm.current = screen_name
+        # Highlight active tab
+        for name, btn in [("dashboard", self.btn_dash), ("add_expense", self.btn_add), ("history", self.btn_hist), ("members", self.btn_mem)]:
+            btn.background_color = ACCENT_CYAN if name == screen_name else CARD_DARK
 
 
 if __name__ == "__main__":

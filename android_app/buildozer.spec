@@ -16,15 +16,15 @@ source.dir = .
 source.include_exts = py,png,jpg,kv,atlas,db
 
 # (str) Application versioning
-version = 1.0.0
+version = 1.0.1
 
 # (list) Application requirements
 requirements = python3,kivy
 
-# (str) Supported orientation (one of landscape, sensorLandscape, portrait or all)
+# (str) Supported orientation (standard Android portrait)
 orientation = portrait
 
-# (bool) Indicate if the application should be fullscreen or not
+# (bool) Fullscreen disabled so native Android status bar & notch are respected
 fullscreen = 0
 
 # (list) Permissions
@@ -47,6 +47,9 @@ android.archs = arm64-v8a
 
 # (bool) enables Android auto backup feature (Android API >=23)
 android.allow_backup = True
+
+# (str) Android window display mode
+android.window_mode = normal
 
 [buildozer]
 
