@@ -1,10 +1,10 @@
 [app]
 
 # (str) Title of your application
-title = Financial Flow
+title = SplitExpense
 
 # (str) Package name
-package.name = financialflow
+package.name = splitexpense
 
 # (str) Package domain (needed for android/ios packaging)
 package.domain = org.bagwe
@@ -16,10 +16,10 @@ source.dir = .
 source.include_exts = py,png,jpg,kv,atlas,db
 
 # (str) Application versioning
-version = 1.0.0
+version = 1.0.1
 
 # (list) Application requirements
-requirements = python3,kivy,sqlite3
+requirements = python3,kivy
 
 # (str) Supported orientation (standard Android portrait)
 orientation = portrait
@@ -28,7 +28,7 @@ orientation = portrait
 fullscreen = 0
 
 # (list) Permissions
-android.permissions = INTERNET,WRITE_EXTERNAL_STORAGE,READ_EXTERNAL_STORAGE
+android.permissions = INTERNET
 
 # (int) Target Android API
 android.api = 33

@@ -1,4 +1,4 @@
-name: Build SplitExpense Android APK
+name: Build Financial Flow Android APK
 
 on:
   push:
@@ -60,6 +60,6 @@ jobs:
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
-          name: SplitExpense-Android-APK
+          name: FinancialFlow-Android-APK
           path: android_app/bin/*.apk
           if-no-files-found: error

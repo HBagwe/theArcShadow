@@ -12,6 +12,9 @@ venv/
 .idea/
 *.iml
 
+# Binaries & Large Tools
+ngrok
+
 # Buildozer and Android artifacts
 .buildozer/
 .buildozer_global/

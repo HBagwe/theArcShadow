@@ -2,7 +2,8 @@
 SplitExpense - Smart Expense Tracker & Settlement Desktop Application
 =====================================================================
 Features:
-- Dark Mode Ambience & Intuitive Modern UI
+- Vibrant, Redefined Modern Multi-Color UI (Dark Mode with Indigo, Cyan, Emerald, Rose, Amber, Purple, Coral accents)
+- Sleek KPI Metrics Cards with individual color-coded glowing left accent bars and badge pills
 - Groups & Members Management (with Phone, Email, UPI/Payment handles)
 - Expense creation with Multiple Split & Allocation Modes:
   * 🎯 Paid for One Person (Full Amount: +Amount to Payer, -Amount to Borrower)
@@ -12,6 +13,7 @@ Features:
   * % Percentages (%) & ⚖ Shares
 - Live Balance Impact Preview (+Added to Payer, -Subtracted from Members)
 - Detailed Member Account Ledger (Every rupee added & subtracted)
+- Color-coded Treeview rows (Emerald for positive, Rose for debtors, Slate for settled)
 - Debt Simplification Algorithm (Min Cash Flow)
 - Settlements & Payment Recording
 - Automated & 1-Click WhatsApp and SMS Reminders with Direct Payment Deep Links (UPI, etc.)
@@ -56,92 +58,92 @@ class Database:
 
             # Members table
             cursor.execute("""
-            CREATE TABLE IF NOT EXISTS members (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL,
-                phone TEXT DEFAULT '',
-                email TEXT DEFAULT '',
-                upi_id TEXT DEFAULT '',
-                payment_notes TEXT DEFAULT '',
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
+            CREATE TABLE IF NOT EXISTS members (\
+                id INTEGER PRIMARY KEY AUTOINCREMENT,\
+                name TEXT NOT NULL,\
+                phone TEXT DEFAULT '',\
+                email TEXT DEFAULT '',\
+                upi_id TEXT DEFAULT '',\
+                payment_notes TEXT DEFAULT '',\
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\
+            )\
             """)
 
             # Groups table
             cursor.execute("""
-            CREATE TABLE IF NOT EXISTS groups (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL,
-                description TEXT DEFAULT '',
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-            )
+            CREATE TABLE IF NOT EXISTS groups (\
+                id INTEGER PRIMARY KEY AUTOINCREMENT,\
+                name TEXT NOT NULL,\
+                description TEXT DEFAULT '',\
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP\
+            )\
             """)
 
             # Group membership
             cursor.execute("""
-            CREATE TABLE IF NOT EXISTS group_members (
-                group_id INTEGER,
-                member_id INTEGER,
-                PRIMARY KEY (group_id, member_id),
-                FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,
-                FOREIGN KEY (member_id) REFERENCES members(id) ON DELETE CASCADE
-            )
+            CREATE TABLE IF NOT EXISTS group_members (\
+                group_id INTEGER,\
+                member_id INTEGER,\
+                PRIMARY KEY (group_id, member_id),\
+                FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,\
+                FOREIGN KEY (member_id) REFERENCES members(id) ON DELETE CASCADE\
+            )\
             """)
 
             # Expenses table
             cursor.execute("""
-            CREATE TABLE IF NOT EXISTS expenses (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                group_id INTEGER,
-                description TEXT NOT NULL,
-                amount REAL NOT NULL,
-                payer_id INTEGER NOT NULL,
-                split_type TEXT NOT NULL,
-                category TEXT DEFAULT 'General',
-                date TEXT NOT NULL,
-                notes TEXT DEFAULT '',
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,
-                FOREIGN KEY (payer_id) REFERENCES members(id) ON DELETE CASCADE
-            )
+            CREATE TABLE IF NOT EXISTS expenses (\
+                id INTEGER PRIMARY KEY AUTOINCREMENT,\
+                group_id INTEGER,\
+                description TEXT NOT NULL,\
+                amount REAL NOT NULL,\
+                payer_id INTEGER NOT NULL,\
+                split_type TEXT NOT NULL,\
+                category TEXT DEFAULT 'General',\
+                date TEXT NOT NULL,\
+                notes TEXT DEFAULT '',\
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\
+                FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,\
+                FOREIGN KEY (payer_id) REFERENCES members(id) ON DELETE CASCADE\
+            )\
             """)
 
             # Expense splits table
             cursor.execute("""
-            CREATE TABLE IF NOT EXISTS expense_splits (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                expense_id INTEGER NOT NULL,
-                member_id INTEGER NOT NULL,
-                amount_owed REAL NOT NULL,
-                FOREIGN KEY (expense_id) REFERENCES expenses(id) ON DELETE CASCADE,
-                FOREIGN KEY (member_id) REFERENCES members(id) ON DELETE CASCADE
-            )
+            CREATE TABLE IF NOT EXISTS expense_splits (\
+                id INTEGER PRIMARY KEY AUTOINCREMENT,\
+                expense_id INTEGER NOT NULL,\
+                member_id INTEGER NOT NULL,\
+                amount_owed REAL NOT NULL,\
+                FOREIGN KEY (expense_id) REFERENCES expenses(id) ON DELETE CASCADE,\
+                FOREIGN KEY (member_id) REFERENCES members(id) ON DELETE CASCADE\
+            )\
             """)
 
             # Settlements table
             cursor.execute("""
-            CREATE TABLE IF NOT EXISTS settlements (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                group_id INTEGER,
-                from_member_id INTEGER NOT NULL,
-                to_member_id INTEGER NOT NULL,
-                amount REAL NOT NULL,
-                payment_mode TEXT DEFAULT 'Cash/UPI',
-                date TEXT NOT NULL,
-                notes TEXT DEFAULT '',
-                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,
-                FOREIGN KEY (from_member_id) REFERENCES members(id) ON DELETE CASCADE,
-                FOREIGN KEY (to_member_id) REFERENCES members(id) ON DELETE CASCADE
-            )
+            CREATE TABLE IF NOT EXISTS settlements (\
+                id INTEGER PRIMARY KEY AUTOINCREMENT,\
+                group_id INTEGER,\
+                from_member_id INTEGER NOT NULL,\
+                to_member_id INTEGER NOT NULL,\
+                amount REAL NOT NULL,\
+                payment_mode TEXT DEFAULT 'Cash/UPI',\
+                date TEXT NOT NULL,\
+                notes TEXT DEFAULT '',\
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,\
+                FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,\
+                FOREIGN KEY (from_member_id) REFERENCES members(id) ON DELETE CASCADE,\
+                FOREIGN KEY (to_member_id) REFERENCES members(id) ON DELETE CASCADE\
+            )\
             """)
 
             # Key-value settings table
             cursor.execute("""
-            CREATE TABLE IF NOT EXISTS settings (
-                key TEXT PRIMARY KEY,
-                value TEXT NOT NULL
-            )
+            CREATE TABLE IF NOT EXISTS settings (\
+                key TEXT PRIMARY KEY,\
+                value TEXT NOT NULL\
+            )\
             """)
 
             cursor.execute("INSERT OR IGNORE INTO settings (key, value) VALUES ('currency', '₹')")
@@ -686,29 +688,49 @@ class NotificationService:
 
 
 # ============================================================================
-# 4. DARK MODE AMBIENCE & INTUITIVE GUI (SPLITEXPENSE)
+# 4. REDEFINED MODERN MULTI-COLOR UI (SPLITEXPENSE)
 # ============================================================================
 
 class SplitExpenseApp:
     def __init__(self, root):
         self.root = root
         self.root.title("SplitExpense • Smart Expense Tracking & Settlement Tool")
-        self.root.geometry("1100x820")
-        self.root.minsize(980, 720)
+        self.root.geometry("1140x840")
+        self.root.minsize(1000, 720)
 
-        # Dark Theme Palette
-        self.BG_MAIN = "#0F172A"       # Deep Dark Background
-        self.BG_SURFACE = "#1E293B"    # Card / Tab Surface
-        self.BG_CARD = "#1E293B"
-        self.BG_INPUT = "#0B132B"      # Dark Input Fields
-        self.BORDER_COLOR = "#334155"  # Slate Border
-        self.TEXT_MAIN = "#F8FAFC"     # Bright White/Slate
-        self.TEXT_MUTED = "#94A3B8"    # Soft Gray
-        self.ACCENT_CYAN = "#38BDF8"   # Highlighting & Icons
-        self.ACCENT_GREEN = "#10B981"  # Emerald Positive / Success
-        self.ACCENT_ROSE = "#F43F5E"   # Rose Danger / Subtracted / Owes
-        self.ACCENT_AMBER = "#F59E0B"  # Amber Warning / Settle
-        self.HEADER_BG = "#0B1120"     # Deep Header Bar
+        # --------------------------------------------------------------------
+        # REDEFINED COLOR PALETTE - HARMONIOUS MULTI-COLOR VIBRANCY
+        # --------------------------------------------------------------------
+        # Foundations
+        self.BG_MAIN = "#0B0F19"         # Deep Slate-Black canvas
+        self.BG_SURFACE = "#151D2C"      # Primary Card / Panel surface
+        self.BG_SURFACE_ALT = "#1A2436"  # Alternating / hover surface
+        self.BG_INPUT = "#0C121E"        # Inset text input & dropdowns
+        self.BORDER_COLOR = "#253347"    # Sleek border line
+        self.BORDER_LIGHT = "#334560"    # Focused border line
+        self.HEADER_BG = "#080C14"       # Top header banner background
+
+        # Text Hierarchy
+        self.TEXT_MAIN = "#F8FAFC"       # Crisp high-contrast white text
+        self.TEXT_MUTED = "#8B9BB4"      # Secondary caption text
+        self.TEXT_DIM = "#566885"        # Subdued hints
+
+        # Vibrant Multi-Color Accents
+        self.COLOR_INDIGO = "#6366F1"    # Royal Indigo / Accent
+        self.COLOR_CYAN = "#06B6D4"      # Electric Cyan
+        self.COLOR_SKY = "#38BDF8"       # Bright Sky Blue
+        self.COLOR_EMERALD = "#10B981"   # Vibrant Emerald Green (Add / Positive)
+        self.COLOR_ROSE = "#F43F5E"      # Bold Rose Pink/Red (Deduct / Owes)
+        self.COLOR_AMBER = "#F59E0B"     # Warm Amber Orange (Settle / Warning)
+        self.COLOR_PURPLE = "#A855F7"    # Radiant Violet / Purple
+        self.COLOR_CORAL = "#FB923C"     # Vivid Coral Tangerine
+        self.COLOR_TEAL = "#14B8A6"      # Deep Teal
+
+        # Backward compatibility aliases
+        self.ACCENT_CYAN = self.COLOR_SKY
+        self.ACCENT_GREEN = self.COLOR_EMERALD
+        self.ACCENT_ROSE = self.COLOR_ROSE
+        self.ACCENT_AMBER = self.COLOR_AMBER
 
         self.db = Database()
         self.engine = SplitwiseEngine(self.db)
@@ -717,11 +739,11 @@ class SplitExpenseApp:
         self.current_group_id = None
         self.currency = self.engine.get_setting("currency", "₹")
 
-        self._configure_dark_styles()
+        self._configure_styles()
         self._build_main_ui()
         self.refresh_all()
 
-    def _configure_dark_styles(self):
+    def _configure_styles(self):
         self.root.configure(bg=self.BG_MAIN)
         self.style = ttk.Style()
         try:
@@ -729,10 +751,10 @@ class SplitExpenseApp:
         except Exception:
             pass
 
-        # General TTK widget configs
+        # General TTK defaults
         self.style.configure(".", font=("Helvetica", 10), background=self.BG_MAIN, foreground=self.TEXT_MAIN)
 
-        # Frames & Containers
+        # Containers
         self.style.configure("TFrame", background=self.BG_MAIN)
         self.style.configure("Surface.TFrame", background=self.BG_SURFACE)
 
@@ -745,11 +767,12 @@ class SplitExpenseApp:
             lightcolor=self.BORDER_COLOR,
             darkcolor=self.BORDER_COLOR,
             borderwidth=1,
+            relief="solid",
         )
         self.style.configure(
             "TLabelframe.Label",
             background=self.BG_SURFACE,
-            foreground=self.ACCENT_CYAN,
+            foreground=self.COLOR_SKY,
             font=("Helvetica", 10, "bold"),
         )
 
@@ -758,7 +781,7 @@ class SplitExpenseApp:
         self.style.configure("Muted.TLabel", background=self.BG_SURFACE, foreground=self.TEXT_MUTED, font=("Helvetica", 9))
         self.style.configure("Header.TLabel", background=self.HEADER_BG, foreground=self.TEXT_MAIN)
 
-        # Notebook (Tabs)
+        # Multi-Color Notebook Navigation Tabs
         self.style.configure("TNotebook", background=self.BG_MAIN, borderwidth=0)
         self.style.configure(
             "TNotebook.Tab",
@@ -770,36 +793,36 @@ class SplitExpenseApp:
         )
         self.style.map(
             "TNotebook.Tab",
-            background=[("selected", self.ACCENT_GREEN), ("active", "#2D3F59")],
+            background=[("selected", self.COLOR_INDIGO), ("active", "#1E2A40")],
             foreground=[("selected", "#FFFFFF"), ("active", self.TEXT_MAIN)],
         )
 
-        # Treeview (Data Tables)
+        # Treeview (Data Tables with Redefined Styling)
         self.style.configure(
             "Treeview",
             background=self.BG_SURFACE,
             foreground=self.TEXT_MAIN,
             fieldbackground=self.BG_SURFACE,
             borderwidth=0,
-            rowheight=30,
+            rowheight=32,
             font=("Helvetica", 10),
         )
         self.style.configure(
             "Treeview.Heading",
-            background="#162238",
-            foreground=self.ACCENT_CYAN,
+            background="#121824",
+            foreground=self.COLOR_SKY,
             relief="flat",
             font=("Helvetica", 10, "bold"),
-            padding=[6, 6],
+            padding=[8, 7],
         )
         self.style.map(
             "Treeview.Heading",
-            background=[("active", "#233554")],
+            background=[("active", "#1A2436")],
             foreground=[("active", "#FFFFFF")],
         )
         self.style.map(
             "Treeview",
-            background=[("selected", "#0284C7")],
+            background=[("selected", "#2A3A54")],
             foreground=[("selected", "#FFFFFF")],
         )
 
@@ -809,7 +832,7 @@ class SplitExpenseApp:
             fieldbackground=self.BG_INPUT,
             background=self.BORDER_COLOR,
             foreground=self.TEXT_MAIN,
-            arrowcolor=self.ACCENT_CYAN,
+            arrowcolor=self.COLOR_SKY,
             darkcolor=self.BORDER_COLOR,
             lightcolor=self.BORDER_COLOR,
             bordercolor=self.BORDER_COLOR,
@@ -837,13 +860,13 @@ class SplitExpenseApp:
             background=self.BG_SURFACE,
             foreground=self.TEXT_MAIN,
             indicatorcolor=self.BG_INPUT,
-            focuscolor=self.ACCENT_CYAN,
+            focuscolor=self.COLOR_SKY,
         )
         self.style.map(
             "TRadiobutton",
             background=[("active", self.BG_SURFACE)],
-            foreground=[("active", self.ACCENT_CYAN)],
-            indicatorcolor=[("selected", self.ACCENT_GREEN)],
+            foreground=[("active", self.COLOR_SKY)],
+            indicatorcolor=[("selected", self.COLOR_EMERALD)],
         )
 
         self.style.configure(
@@ -855,15 +878,15 @@ class SplitExpenseApp:
         self.style.map(
             "TCheckbutton",
             background=[("active", self.BG_SURFACE)],
-            foreground=[("active", self.ACCENT_CYAN)],
-            indicatorcolor=[("selected", self.ACCENT_GREEN)],
+            foreground=[("active", self.COLOR_SKY)],
+            indicatorcolor=[("selected", self.COLOR_EMERALD)],
         )
 
-        # Custom Buttons
+        # Custom Redefined Multi-Color Action Buttons
         self.style.configure(
             "Primary.TButton",
             font=("Helvetica", 10, "bold"),
-            background=self.ACCENT_GREEN,
+            background=self.COLOR_EMERALD,
             foreground="#FFFFFF",
             borderwidth=0,
             padding=[12, 6],
@@ -871,9 +894,49 @@ class SplitExpenseApp:
         self.style.map("Primary.TButton", background=[("active", "#059669")])
 
         self.style.configure(
+            "Indigo.TButton",
+            font=("Helvetica", 10, "bold"),
+            background=self.COLOR_INDIGO,
+            foreground="#FFFFFF",
+            borderwidth=0,
+            padding=[12, 6],
+        )
+        self.style.map("Indigo.TButton", background=[("active", "#4F46E5")])
+
+        self.style.configure(
+            "Cyan.TButton",
+            font=("Helvetica", 10, "bold"),
+            background=self.COLOR_CYAN,
+            foreground="#FFFFFF",
+            borderwidth=0,
+            padding=[12, 6],
+        )
+        self.style.map("Cyan.TButton", background=[("active", "#0891B2")])
+
+        self.style.configure(
+            "Amber.TButton",
+            font=("Helvetica", 10, "bold"),
+            background=self.COLOR_AMBER,
+            foreground="#FFFFFF",
+            borderwidth=0,
+            padding=[12, 6],
+        )
+        self.style.map("Amber.TButton", background=[("active", "#D97706")])
+
+        self.style.configure(
+            "Purple.TButton",
+            font=("Helvetica", 10, "bold"),
+            background=self.COLOR_PURPLE,
+            foreground="#FFFFFF",
+            borderwidth=0,
+            padding=[12, 6],
+        )
+        self.style.map("Purple.TButton", background=[("active", "#9333EA")])
+
+        self.style.configure(
             "Danger.TButton",
             font=("Helvetica", 10, "bold"),
-            background=self.ACCENT_ROSE,
+            background=self.COLOR_ROSE,
             foreground="#FFFFFF",
             borderwidth=0,
             padding=[12, 6],
@@ -883,47 +946,66 @@ class SplitExpenseApp:
         self.style.configure(
             "Secondary.TButton",
             font=("Helvetica", 10),
-            background="#334155",
+            background="#253347",
             foreground=self.TEXT_MAIN,
             borderwidth=0,
             padding=[12, 6],
         )
-        self.style.map("Secondary.TButton", background=[("active", "#475569")])
+        self.style.map("Secondary.TButton", background=[("active", "#334560")])
 
     def _build_main_ui(self):
-        # 1. Sleek Header Banner
-        header = tk.Frame(self.root, bg=self.HEADER_BG, height=80, bd=0)
+        # --------------------------------------------------------------------
+        # 1. SLEEK MULTI-COLOR GRADIENT-ACCENTED HEADER
+        # --------------------------------------------------------------------
+        header = tk.Frame(self.root, bg=self.HEADER_BG, height=84, bd=0)
         header.pack(fill=tk.X, side=tk.TOP)
 
-        title_frame = tk.Frame(header, bg=self.HEADER_BG)
-        title_frame.pack(side=tk.LEFT, padx=22, pady=12)
+        # Multi-Color Top Glowing Accent Line
+        glow_line = tk.Frame(header, height=3, bg=self.HEADER_BG)
+        glow_line.pack(fill=tk.X, side=tk.TOP)
+        colors_glow = [self.COLOR_CYAN, self.COLOR_INDIGO, self.COLOR_PURPLE, self.COLOR_EMERALD, self.COLOR_AMBER, self.COLOR_ROSE]
+        for c in colors_glow:
+            tk.Frame(glow_line, bg=c, height=3).pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+        header_content = tk.Frame(header, bg=self.HEADER_BG)
+        header_content.pack(fill=tk.BOTH, expand=True, padx=22, pady=10)
+
+        title_frame = tk.Frame(header_content, bg=self.HEADER_BG)
+        title_frame.pack(side=tk.LEFT)
 
         logo_title_row = tk.Frame(title_frame, bg=self.HEADER_BG)
         logo_title_row.pack(anchor=tk.W)
 
-        tk.Label(logo_title_row, text="⚡ SplitExpense", font=("Helvetica", 19, "bold"), fg=self.ACCENT_CYAN, bg=self.HEADER_BG).pack(side=tk.LEFT)
-        badge = tk.Label(logo_title_row, text=" PRO ", font=("Helvetica", 8, "bold"), fg=self.BG_MAIN, bg=self.ACCENT_GREEN, padx=5, pady=1)
-        badge.pack(side=tk.LEFT, padx=8)
+        tk.Label(logo_title_row, text="⚡ SplitExpense", font=("Helvetica", 20, "bold"), fg=self.COLOR_SKY, bg=self.HEADER_BG).pack(side=tk.LEFT)
+
+        # Modern Rounded Badge Pills
+        badge_pro = tk.Label(logo_title_row, text=" PRO ", font=("Helvetica", 8, "bold"), fg="#FFFFFF", bg=self.COLOR_INDIGO, padx=6, pady=1)
+        badge_pro.pack(side=tk.LEFT, padx=6)
+
+        badge_live = tk.Label(logo_title_row, text=" ● ACTIVE ", font=("Helvetica", 7, "bold"), fg=self.COLOR_EMERALD, bg="#0D281E", padx=6, pady=2)
+        badge_live.pack(side=tk.LEFT, padx=2)
 
         tk.Label(
             title_frame,
-            text="Smart Expense Tracking • True Added & Subtracted Balances • 1-Click WhatsApp Reminders",
+            text="Intelligent Expense Splitting • Multi-Color Ambience • Real-Time Added & Subtracted Ledger",
             font=("Helvetica", 9),
             fg=self.TEXT_MUTED,
             bg=self.HEADER_BG,
-        ).pack(anchor=tk.W, pady=(2, 0))
+        ).pack(anchor=tk.W, pady=(3, 0))
 
-        # Right group selector
-        group_sel_frame = tk.Frame(header, bg=self.HEADER_BG)
-        group_sel_frame.pack(side=tk.RIGHT, padx=22, pady=18)
+        # Right Active Group Selector with custom styling
+        group_sel_frame = tk.Frame(header_content, bg=self.HEADER_BG)
+        group_sel_frame.pack(side=tk.RIGHT, pady=6)
 
-        tk.Label(group_sel_frame, text="Active Group:", font=("Helvetica", 10, "bold"), fg=self.TEXT_MAIN, bg=self.HEADER_BG).pack(side=tk.LEFT, padx=(0, 8))
+        tk.Label(group_sel_frame, text="Active Group:", font=("Helvetica", 10, "bold"), fg=self.COLOR_CYAN, bg=self.HEADER_BG).pack(side=tk.LEFT, padx=(0, 8))
         self.top_group_var = tk.StringVar(value="All Groups")
         self.top_group_combo = ttk.Combobox(group_sel_frame, textvariable=self.top_group_var, state="readonly", width=22)
         self.top_group_combo.pack(side=tk.LEFT)
         self.top_group_combo.bind("<<ComboboxSelected>>", self._on_top_group_changed)
 
-        # 2. Main Tabbed Notebook
+        # --------------------------------------------------------------------
+        # 2. MAIN TABBED NOTEBOOK
+        # --------------------------------------------------------------------
         self.notebook = ttk.Notebook(self.root)
         self.notebook.pack(fill=tk.BOTH, expand=True, padx=16, pady=12)
 
@@ -951,35 +1033,62 @@ class SplitExpenseApp:
         self.notebook.add(self.tab_settings, text="  ⚙️ Settings  ")
         self._build_settings_tab()
 
-        # Bottom Status Bar
+        # --------------------------------------------------------------------
+        # 3. BOTTOM MULTI-COLOR STATUS BAR
+        # --------------------------------------------------------------------
+        status_container = tk.Frame(self.root, bg=self.HEADER_BG, height=28)
+        status_container.pack(side=tk.BOTTOM, fill=tk.X)
+
         self.status_bar = tk.Label(
-            self.root,
-            text="Ready • SplitExpense Dark Mode Engine Active",
+            status_container,
+            text="Ready • SplitExpense Multi-Color Engine Active",
             bd=0,
             anchor=tk.W,
             font=("Helvetica", 9),
-            bg="#090E1A",
+            bg=self.HEADER_BG,
             fg=self.TEXT_MUTED,
             padx=14,
             pady=4,
         )
-        self.status_bar.pack(side=tk.BOTTOM, fill=tk.X)
+        self.status_bar.pack(side=tk.LEFT, fill=tk.X, expand=True)
+
+        # Right status indicator
+        tk.Label(
+            status_container,
+            text="● Engine Online",
+            font=("Helvetica", 8, "bold"),
+            bg=self.HEADER_BG,
+            fg=self.COLOR_EMERALD,
+            padx=14,
+        ).pack(side=tk.RIGHT)
 
     # ========================================================================
     # TAB 1: DASHBOARD & DEBT SIMPLIFICATION
     # ========================================================================
     def _build_dashboard_tab(self):
+        # 4 Enhanced Color-Coded KPI Cards
         kpi_frame = tk.Frame(self.tab_dashboard, bg=self.BG_MAIN)
         kpi_frame.pack(fill=tk.X, pady=(0, 12))
 
-        self.kpi_total_spent = self._create_dark_kpi_card(kpi_frame, "Total Group Spending", f"{self.currency}0.00", self.ACCENT_CYAN, "💰")
-        self.kpi_total_spent.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 10))
+        self.kpi_total_spent = self._create_enhanced_kpi_card(
+            kpi_frame, "Total Spent", f"{self.currency}0.00", self.COLOR_CYAN, "💰", "Group Total"
+        )
+        self.kpi_total_spent.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 8))
 
-        self.kpi_total_expenses = self._create_dark_kpi_card(kpi_frame, "Expenses Logged", "0", "#A78BFA", "🧾")
-        self.kpi_total_expenses.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 10))
+        self.kpi_total_expenses = self._create_enhanced_kpi_card(
+            kpi_frame, "Expenses Logged", "0", self.COLOR_PURPLE, "🧾", "Activity"
+        )
+        self.kpi_total_expenses.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 8))
 
-        self.kpi_debts_count = self._create_dark_kpi_card(kpi_frame, "Pending Settlements", "0", self.ACCENT_AMBER, "⚖️")
-        self.kpi_debts_count.pack(side=tk.LEFT, fill=tk.X, expand=True)
+        self.kpi_debts_count = self._create_enhanced_kpi_card(
+            kpi_frame, "Pending Debts", "0", self.COLOR_AMBER, "⚖️", "Unsettled"
+        )
+        self.kpi_debts_count.pack(side=tk.LEFT, fill=tk.X, expand=True, padx=(0, 8))
+
+        self.kpi_members_count = self._create_enhanced_kpi_card(
+            kpi_frame, "Active Members", "0", self.COLOR_EMERALD, "👥", "Directory"
+        )
+        self.kpi_members_count.pack(side=tk.LEFT, fill=tk.X, expand=True)
 
         split_frame = tk.Frame(self.tab_dashboard, bg=self.BG_MAIN)
         split_frame.pack(fill=tk.BOTH, expand=True)
@@ -1004,11 +1113,16 @@ class SplitExpenseApp:
         self.tree_balances.column("balance", width=115, anchor=tk.E)
         self.tree_balances.column("status", width=120, anchor=tk.CENTER)
 
+        # Configure color-coded tag appearances for balances table
+        self.tree_balances.tag_configure("positive", foreground=self.COLOR_EMERALD)
+        self.tree_balances.tag_configure("negative", foreground=self.COLOR_ROSE)
+        self.tree_balances.tag_configure("settled", foreground=self.TEXT_MUTED)
+
         self.tree_balances.pack(fill=tk.BOTH, expand=True)
 
         bal_btn_row = tk.Frame(left_card, bg=self.BG_SURFACE)
         bal_btn_row.pack(fill=tk.X, pady=(10, 0))
-        ttk.Button(bal_btn_row, text="🔍 View Member Account Ledger", style="Secondary.TButton", command=self.handle_view_member_ledger).pack(side=tk.LEFT)
+        ttk.Button(bal_btn_row, text="🔍 View Member Account Ledger", style="Indigo.TButton", command=self.handle_view_member_ledger).pack(side=tk.LEFT)
 
         # Right: Simplified Debts Card
         right_card = ttk.LabelFrame(split_frame, text=" Simplified Settlement Plan (Direct Pay Plan) ", padding=12)
@@ -1028,26 +1142,48 @@ class SplitExpenseApp:
         self.tree_plan.column("amount", width=95, anchor=tk.E)
         self.tree_plan.column("actions", width=90, anchor=tk.CENTER)
 
+        self.tree_plan.tag_configure("debt_row", foreground="#FCD34D")
+
         self.tree_plan.pack(fill=tk.BOTH, expand=True)
 
         plan_btn_frame = tk.Frame(right_card, bg=self.BG_SURFACE)
         plan_btn_frame.pack(fill=tk.X, pady=(10, 0))
 
         ttk.Button(plan_btn_frame, text="💬 WhatsApp Reminder", style="Primary.TButton", command=self.handle_send_reminder_from_plan).pack(side=tk.LEFT, padx=(0, 8))
-        ttk.Button(plan_btn_frame, text="✓ Settle Debt", style="Secondary.TButton", command=self.handle_record_settlement_from_plan).pack(side=tk.LEFT)
+        ttk.Button(plan_btn_frame, text="✓ Settle Debt", style="Amber.TButton", command=self.handle_record_settlement_from_plan).pack(side=tk.LEFT)
 
-    def _create_dark_kpi_card(self, parent, title, value, color, icon=""):
-        frame = tk.Frame(parent, bg=self.BG_SURFACE, highlightbackground=self.BORDER_COLOR, highlightthickness=1, padx=16, pady=12)
+    def _create_enhanced_kpi_card(self, parent, title, value, accent_color, icon="", pill_text=""):
+        # Modern Card with individual color accent stripe on left
+        outer_card = tk.Frame(parent, bg=self.BORDER_COLOR, bd=0, padx=1, pady=1)
 
-        top_row = tk.Frame(frame, bg=self.BG_SURFACE)
+        card = tk.Frame(outer_card, bg=self.BG_SURFACE, bd=0)
+        card.pack(fill=tk.BOTH, expand=True)
+
+        # Left color bar
+        left_bar = tk.Frame(card, bg=accent_color, width=4)
+        left_bar.pack(side=tk.LEFT, fill=tk.Y)
+
+        content = tk.Frame(card, bg=self.BG_SURFACE, padx=12, pady=10)
+        content.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
+        # Header Row
+        top_row = tk.Frame(content, bg=self.BG_SURFACE)
         top_row.pack(fill=tk.X)
 
-        tk.Label(top_row, text=f"{icon}  {title}", font=("Helvetica", 9, "bold"), fg=self.TEXT_MUTED, bg=self.BG_SURFACE).pack(side=tk.LEFT)
+        tk.Label(top_row, text=f"{icon} {title}", font=("Helvetica", 9, "bold"), fg=self.TEXT_MUTED, bg=self.BG_SURFACE).pack(side=tk.LEFT)
 
-        val_lbl = tk.Label(frame, text=value, font=("Helvetica", 17, "bold"), fg=color, bg=self.BG_SURFACE)
-        val_lbl.pack(anchor=tk.W, pady=(4, 0))
-        frame.val_lbl = val_lbl
-        return frame
+        if pill_text:
+            pill = tk.Label(top_row, text=f" {pill_text} ", font=("Helvetica", 7, "bold"), fg=accent_color, bg="#111B28", padx=4, pady=1)
+            pill.pack(side=tk.RIGHT)
+
+        val_lbl = tk.Label(content, text=value, font=("Helvetica", 16, "bold"), fg=accent_color, bg=self.BG_SURFACE)
+        val_lbl.pack(anchor=tk.W, pady=(3, 0))
+
+        outer_card.val_lbl = val_lbl
+        return outer_card
+
+    def _create_dark_kpi_card(self, parent, title, value, color, icon=""):
+        return self._create_enhanced_kpi_card(parent, title, value, color, icon)
 
     def handle_view_member_ledger(self):
         selected = self.tree_balances.selection()
@@ -1068,14 +1204,14 @@ class SplitExpenseApp:
 
         modal = tk.Toplevel(self.root)
         modal.title(f"Account Statement • {member['name']}")
-        modal.geometry("740x480")
+        modal.geometry("780x500")
         modal.configure(bg=self.BG_MAIN)
         modal.transient(self.root)
 
-        header_frame = tk.Frame(modal, bg=self.BG_MAIN)
-        header_frame.pack(fill=tk.X, padx=18, pady=(14, 4))
-        tk.Label(header_frame, text=f"Account Statement for {member['name']}", font=("Helvetica", 13, "bold"), fg=self.ACCENT_CYAN, bg=self.BG_MAIN).pack(anchor=tk.W)
-        tk.Label(header_frame, text="Complete audit trail showing every transaction where amount was Added (+) or Subtracted (-)", font=("Helvetica", 9), fg=self.TEXT_MUTED, bg=self.BG_MAIN).pack(anchor=tk.W)
+        header_frame = tk.Frame(modal, bg=self.HEADER_BG, padx=18, pady=14)
+        header_frame.pack(fill=tk.X)
+        tk.Label(header_frame, text=f"📊 Account Statement for {member['name']}", font=("Helvetica", 13, "bold"), fg=self.COLOR_SKY, bg=self.HEADER_BG).pack(anchor=tk.W)
+        tk.Label(header_frame, text="Complete audit trail showing every transaction where amount was Added (+) or Subtracted (-)", font=("Helvetica", 9), fg=self.TEXT_MUTED, bg=self.HEADER_BG).pack(anchor=tk.W, pady=(2, 0))
 
         columns = ("date", "desc", "added", "subtracted", "net")
         tree = ttk.Treeview(modal, columns=columns, show="headings", height=12)
@@ -1086,24 +1222,28 @@ class SplitExpenseApp:
         tree.heading("net", text="Net Impact")
 
         tree.column("date", width=95)
-        tree.column("desc", width=320)
+        tree.column("desc", width=340)
         tree.column("added", width=105, anchor=tk.E)
         tree.column("subtracted", width=105, anchor=tk.E)
         tree.column("net", width=105, anchor=tk.E)
+
+        tree.tag_configure("pos_tx", foreground=self.COLOR_EMERALD)
+        tree.tag_configure("neg_tx", foreground=self.COLOR_ROSE)
 
         for item in ledger:
             add_str = f"+{self.currency}{item['added']:.2f}" if item['added'] > 0 else "—"
             sub_str = f"-{self.currency}{item['subtracted']:.2f}" if item['subtracted'] > 0 else "—"
             net_sign = "+" if item['net_change'] > 0 else ""
+            tag = "pos_tx" if item['net_change'] > 0 else "neg_tx"
             tree.insert("", tk.END, values=(
                 item["date"],
                 item["description"],
                 add_str,
                 sub_str,
                 f"{net_sign}{self.currency}{item['net_change']:.2f}"
-            ))
+            ), tags=(tag,))
 
-        tree.pack(fill=tk.BOTH, expand=True, padx=18, pady=8)
+        tree.pack(fill=tk.BOTH, expand=True, padx=18, pady=10)
         ttk.Button(modal, text="Close Statement", style="Secondary.TButton", command=modal.destroy).pack(pady=(0, 14))
 
     # ========================================================================
@@ -1124,7 +1264,7 @@ class SplitExpenseApp:
         self.exp_desc_var = tk.StringVar()
         ttk.Entry(row1, textvariable=self.exp_desc_var, width=30).pack(side=tk.LEFT, padx=(0, 24))
 
-        tk.Label(row1, text="Total Amount *:", width=14, anchor=tk.W, fg=self.TEXT_MAIN, bg=self.BG_SURFACE).pack(side=tk.LEFT)
+        tk.Label(row1, text="Total Amount *:", width=14, anchor=tk.W, fg=self.COLOR_EMERALD, bg=self.BG_SURFACE, font=("Helvetica", 10, "bold")).pack(side=tk.LEFT)
         self.exp_amt_var = tk.StringVar()
         amt_entry = ttk.Entry(row1, textvariable=self.exp_amt_var, width=16)
         amt_entry.pack(side=tk.LEFT)
@@ -1133,7 +1273,7 @@ class SplitExpenseApp:
         row2 = tk.Frame(detail_card, bg=self.BG_SURFACE)
         row2.pack(fill=tk.X, pady=4)
 
-        tk.Label(row2, text="Paid By *:", width=14, anchor=tk.W, fg=self.TEXT_MAIN, bg=self.BG_SURFACE).pack(side=tk.LEFT)
+        tk.Label(row2, text="Paid By *:", width=14, anchor=tk.W, fg=self.COLOR_SKY, bg=self.BG_SURFACE, font=("Helvetica", 10, "bold")).pack(side=tk.LEFT)
         self.exp_payer_var = tk.StringVar()
         self.exp_payer_combo = ttk.Combobox(row2, textvariable=self.exp_payer_var, state="readonly", width=28)
         self.exp_payer_combo.pack(side=tk.LEFT, padx=(0, 24))
@@ -1164,7 +1304,7 @@ class SplitExpenseApp:
         mode_frame = tk.Frame(split_card, bg=self.BG_SURFACE)
         mode_frame.pack(fill=tk.X, pady=(0, 8))
 
-        tk.Label(mode_frame, text="Allocation Mode:", font=("Helvetica", 10, "bold"), fg=self.ACCENT_CYAN, bg=self.BG_SURFACE).pack(side=tk.LEFT, padx=(0, 12))
+        tk.Label(mode_frame, text="Allocation Mode:", font=("Helvetica", 10, "bold"), fg=self.COLOR_SKY, bg=self.BG_SURFACE).pack(side=tk.LEFT, padx=(0, 12))
         self.split_strategy_var = tk.StringVar(value="EQUAL_INCL")
 
         modes = [
@@ -1181,7 +1321,7 @@ class SplitExpenseApp:
 
         # Dynamic Single Person Selector (shown only if FULL_ONE selected)
         self.single_person_frame = tk.Frame(split_card, bg=self.BG_SURFACE)
-        tk.Label(self.single_person_frame, text="Who owes this full amount? (Borrower):", font=("Helvetica", 10, "bold"), fg=self.TEXT_MAIN, bg=self.BG_SURFACE).pack(side=tk.LEFT, padx=(0, 10))
+        tk.Label(self.single_person_frame, text="Who owes this full amount? (Borrower):", font=("Helvetica", 10, "bold"), fg=self.COLOR_ROSE, bg=self.BG_SURFACE).pack(side=tk.LEFT, padx=(0, 10))
         self.single_borrower_var = tk.StringVar()
         self.single_borrower_combo = ttk.Combobox(self.single_person_frame, textvariable=self.single_borrower_var, state="readonly", width=26)
         self.single_borrower_combo.pack(side=tk.LEFT)
@@ -1191,21 +1331,21 @@ class SplitExpenseApp:
         self.split_table_frame = tk.Frame(split_card, bg=self.BG_SURFACE)
         self.split_table_frame.pack(fill=tk.BOTH, expand=True, pady=4)
 
-        # Live Balance Impact Box (Dark Ambience Card)
-        self.impact_box = tk.Frame(split_card, bg="#132438", highlightbackground=self.BORDER_COLOR, highlightthickness=1, padx=14, pady=8)
+        # Live Balance Impact Box (Multi-Color Accent Card)
+        self.impact_box = tk.Frame(split_card, bg="#0E1726", highlightbackground=self.BORDER_COLOR, highlightthickness=1, padx=14, pady=8)
         self.impact_box.pack(fill=tk.X, pady=(6, 0))
 
-        self.impact_lbl_title = tk.Label(self.impact_box, text="💡 Live Balance Impact (Preview before saving):", font=("Helvetica", 9, "bold"), fg=self.ACCENT_CYAN, bg="#132438")
+        self.impact_lbl_title = tk.Label(self.impact_box, text="💡 Live Balance Impact (Preview before saving):", font=("Helvetica", 9, "bold"), fg=self.COLOR_SKY, bg="#0E1726")
         self.impact_lbl_title.pack(anchor=tk.W)
 
-        self.impact_lbl_details = tk.Label(self.impact_box, text="", font=("Helvetica", 9), fg="#E2E8F0", bg="#132438", justify=tk.LEFT)
+        self.impact_lbl_details = tk.Label(self.impact_box, text="", font=("Helvetica", 9), fg="#E2E8F0", bg="#0E1726", justify=tk.LEFT)
         self.impact_lbl_details.pack(anchor=tk.W, pady=(2, 0))
 
         # Validation status
-        self.split_calc_status = tk.Label(split_card, text="", font=("Helvetica", 9, "bold"), fg=self.ACCENT_CYAN, bg=self.BG_SURFACE)
+        self.split_calc_status = tk.Label(split_card, text="", font=("Helvetica", 9, "bold"), fg=self.COLOR_SKY, bg=self.BG_SURFACE)
         self.split_calc_status.pack(anchor=tk.W, pady=(6, 0))
 
-        # Bottom Buttons
+        # Bottom Action Buttons
         btn_frame = tk.Frame(container, bg=self.BG_MAIN)
         btn_frame.pack(fill=tk.X, pady=(4, 0))
 
@@ -1277,10 +1417,10 @@ class SplitExpenseApp:
 
         h_frame = tk.Frame(self.split_table_frame, bg=self.BG_SURFACE)
         h_frame.pack(fill=tk.X, pady=(0, 6))
-        tk.Label(h_frame, text="Participates?", width=13, font=("Helvetica", 9, "bold"), fg=self.ACCENT_CYAN, bg=self.BG_SURFACE).pack(side=tk.LEFT)
-        tk.Label(h_frame, text="Member Name", width=24, anchor=tk.W, font=("Helvetica", 9, "bold"), fg=self.ACCENT_CYAN, bg=self.BG_SURFACE).pack(side=tk.LEFT)
-        tk.Label(h_frame, text="Input (₹ / % / sh)", width=18, font=("Helvetica", 9, "bold"), fg=self.ACCENT_CYAN, bg=self.BG_SURFACE).pack(side=tk.LEFT)
-        tk.Label(h_frame, text="Subtracted Amount", width=18, font=("Helvetica", 9, "bold"), fg=self.ACCENT_CYAN, bg=self.BG_SURFACE).pack(side=tk.LEFT)
+        tk.Label(h_frame, text="Participates?", width=13, font=("Helvetica", 9, "bold"), fg=self.COLOR_SKY, bg=self.BG_SURFACE).pack(side=tk.LEFT)
+        tk.Label(h_frame, text="Member Name", width=24, anchor=tk.W, font=("Helvetica", 9, "bold"), fg=self.COLOR_SKY, bg=self.BG_SURFACE).pack(side=tk.LEFT)
+        tk.Label(h_frame, text="Input (₹ / % / sh)", width=18, font=("Helvetica", 9, "bold"), fg=self.COLOR_SKY, bg=self.BG_SURFACE).pack(side=tk.LEFT)
+        tk.Label(h_frame, text="Subtracted Amount", width=18, font=("Helvetica", 9, "bold"), fg=self.COLOR_ROSE, bg=self.BG_SURFACE).pack(side=tk.LEFT)
 
         canvas = tk.Canvas(self.split_table_frame, borderwidth=0, highlightthickness=0, height=135, bg=self.BG_SURFACE)
         scrollbar = ttk.Scrollbar(self.split_table_frame, orient="vertical", command=canvas.yview)
@@ -1313,7 +1453,7 @@ class SplitExpenseApp:
             entry.pack(side=tk.LEFT, padx=(0, 14))
             entry.bind("<KeyRelease>", lambda e: self._recalculate_splits())
 
-            share_lbl = tk.Label(r, text=f"-{self.currency}0.00", width=18, fg=self.ACCENT_ROSE, bg=self.BG_SURFACE, font=("Helvetica", 9, "bold"))
+            share_lbl = tk.Label(r, text=f"-{self.currency}0.00", width=18, fg=self.COLOR_ROSE, bg=self.BG_SURFACE, font=("Helvetica", 9, "bold"))
             share_lbl.pack(side=tk.LEFT)
 
             self.participant_rows.append({
@@ -1341,13 +1481,13 @@ class SplitExpenseApp:
         if mode == "FULL_ONE":
             borrower_name = self.single_borrower_var.get()
             if not borrower_name or borrower_name == payer_name:
-                self.split_calc_status.config(text="⚠ Select a borrower different from the payer.", fg=self.ACCENT_ROSE)
+                self.split_calc_status.config(text="⚠ Select a borrower different from the payer.", fg=self.COLOR_ROSE)
                 self.impact_lbl_details.config(text="")
                 return
 
             self.split_calc_status.config(
                 text=f"✓ Full amount {self.currency}{total_amt:.2f} is added to {payer_name} and subtracted from {borrower_name}.",
-                fg=self.ACCENT_GREEN
+                fg=self.COLOR_EMERALD
             )
             impact_lines.append(f"• {payer_name} (Payer): +{self.currency}{total_amt:.2f} (Added to balance)")
             impact_lines.append(f"• {borrower_name} (Borrower): -{self.currency}{total_amt:.2f} (Subtracted from balance)")
@@ -1357,7 +1497,7 @@ class SplitExpenseApp:
         included_rows = [r for r in getattr(self, "participant_rows", []) if r["included"].get()]
 
         if not included_rows:
-            self.split_calc_status.config(text="⚠ Select at least one participant.", fg=self.ACCENT_ROSE)
+            self.split_calc_status.config(text="⚠ Select at least one participant.", fg=self.COLOR_ROSE)
             self.impact_lbl_details.config(text="")
             return
 
@@ -1381,7 +1521,7 @@ class SplitExpenseApp:
             mode_desc = "including payer" if mode == "EQUAL_INCL" else "excluding payer"
             self.split_calc_status.config(
                 text=f"✓ Split equally ({mode_desc}) among {count} members: ~{self.currency}{base_share:.2f} each. Total: {self.currency}{total_amt:.2f}",
-                fg=self.ACCENT_GREEN
+                fg=self.COLOR_EMERALD
             )
 
         elif mode == "EXACT":
@@ -1402,11 +1542,11 @@ class SplitExpenseApp:
 
             diff = round(total_amt - sum_exact, 2)
             if abs(diff) < 0.01:
-                self.split_calc_status.config(text=f"✓ Exact amounts sum correctly to {self.currency}{total_amt:.2f}", fg=self.ACCENT_GREEN)
+                self.split_calc_status.config(text=f"✓ Exact amounts sum correctly to {self.currency}{total_amt:.2f}", fg=self.COLOR_EMERALD)
             elif diff > 0:
-                self.split_calc_status.config(text=f"⚠ Remaining to allocate: {self.currency}{diff:.2f}", fg=self.ACCENT_AMBER)
+                self.split_calc_status.config(text=f"⚠ Remaining to allocate: {self.currency}{diff:.2f}", fg=self.COLOR_AMBER)
             else:
-                self.split_calc_status.config(text=f"⚠ Overallocated by: {self.currency}{-diff:.2f}", fg=self.ACCENT_ROSE)
+                self.split_calc_status.config(text=f"⚠ Overallocated by: {self.currency}{-diff:.2f}", fg=self.COLOR_ROSE)
 
         elif mode == "PERCENT":
             sum_pct = 0.0
@@ -1427,11 +1567,11 @@ class SplitExpenseApp:
 
             diff_pct = round(100.0 - sum_pct, 2)
             if abs(diff_pct) < 0.01:
-                self.split_calc_status.config(text="✓ Percentages sum to 100%", fg=self.ACCENT_GREEN)
+                self.split_calc_status.config(text="✓ Percentages sum to 100%", fg=self.COLOR_EMERALD)
             elif diff_pct > 0:
-                self.split_calc_status.config(text=f"⚠ Remaining % to allocate: {diff_pct:.1f}%", fg=self.ACCENT_AMBER)
+                self.split_calc_status.config(text=f"⚠ Remaining % to allocate: {diff_pct:.1f}%", fg=self.COLOR_AMBER)
             else:
-                self.split_calc_status.config(text=f"⚠ Total % exceeds 100% by {-diff_pct:.1f}%", fg=self.ACCENT_ROSE)
+                self.split_calc_status.config(text=f"⚠ Total % exceeds 100% by {-diff_pct:.1f}%", fg=self.COLOR_ROSE)
 
         elif mode == "SHARES":
             total_shares = 0.0
@@ -1458,7 +1598,7 @@ class SplitExpenseApp:
                         r["calculated_amount"] = 0.0
                         r["share_lbl"].config(text=f"{self.currency}0.00")
 
-                self.split_calc_status.config(text=f"✓ Split proportionally by {total_shares} total shares", fg=self.ACCENT_GREEN)
+                self.split_calc_status.config(text=f"✓ Split proportionally by {total_shares} total shares", fg=self.COLOR_EMERALD)
 
         # Build live impact preview
         payer_share = 0.0
@@ -1575,18 +1715,18 @@ class SplitExpenseApp:
     def _open_multi_dispatch_modal(self, desc, total_amt, payer, non_payer_splits):
         modal = tk.Toplevel(self.root)
         modal.title("Send Expense Notifications • SplitExpense")
-        modal.geometry("660x540")
+        modal.geometry("680x540")
         modal.configure(bg=self.BG_MAIN)
         modal.transient(self.root)
         modal.grab_set()
 
-        h_frame = tk.Frame(modal, bg=self.BG_MAIN)
-        h_frame.pack(fill=tk.X, padx=18, pady=(16, 6))
+        h_frame = tk.Frame(modal, bg=self.HEADER_BG, padx=18, pady=14)
+        h_frame.pack(fill=tk.X)
 
-        tk.Label(h_frame, text=f"📢 Send Share Notifications for '{desc}'", font=("Helvetica", 13, "bold"), fg=self.ACCENT_CYAN, bg=self.BG_MAIN).pack(anchor=tk.W)
-        tk.Label(h_frame, text=f"Total: {self.currency}{total_amt:.2f} • Paid by: {payer['name']} (UPI: {payer.get('upi_id', 'N/A')})", font=("Helvetica", 10), fg=self.TEXT_MUTED, bg=self.BG_MAIN).pack(anchor=tk.W, pady=(2, 0))
+        tk.Label(h_frame, text=f"📢 Send Share Notifications for '{desc}'", font=("Helvetica", 13, "bold"), fg=self.COLOR_SKY, bg=self.HEADER_BG).pack(anchor=tk.W)
+        tk.Label(h_frame, text=f"Total: {self.currency}{total_amt:.2f} • Paid by: {payer['name']} (UPI: {payer.get('upi_id', 'N/A')})", font=("Helvetica", 10), fg=self.TEXT_MUTED, bg=self.HEADER_BG).pack(anchor=tk.W, pady=(2, 0))
 
-        list_frame = tk.Frame(modal, bg=self.BG_MAIN, padx=18)
+        list_frame = tk.Frame(modal, bg=self.BG_MAIN, padx=18, pady=12)
         list_frame.pack(fill=tk.BOTH, expand=True)
 
         for mid, amt in non_payer_splits:
@@ -1594,11 +1734,11 @@ class SplitExpenseApp:
             if not m:
                 continue
 
-            card = tk.Frame(list_frame, bg=self.BG_SURFACE, highlightbackground=self.BORDER_COLOR, highlightthickness=1, padx=12, pady=10)
+            card = tk.Frame(list_frame, bg=self.BG_SURFACE, highlightbackground=self.BORDER_COLOR, highlightthickness=1, padx=14, pady=10)
             card.pack(fill=tk.X, pady=4)
 
             tk.Label(card, text=f"{m['name']} ({m.get('phone') or 'No phone'})", font=("Helvetica", 10, "bold"), fg=self.TEXT_MAIN, bg=self.BG_SURFACE).pack(side=tk.LEFT)
-            tk.Label(card, text=f"Owes: {self.currency}{amt:.2f}", font=("Helvetica", 10, "bold"), fg=self.ACCENT_ROSE, bg=self.BG_SURFACE).pack(side=tk.LEFT, padx=14)
+            tk.Label(card, text=f"Owes: {self.currency}{amt:.2f}", font=("Helvetica", 10, "bold"), fg=self.COLOR_ROSE, bg=self.BG_SURFACE).pack(side=tk.LEFT, padx=14)
 
             msg = self.notifier.generate_expense_alert_message(
                 m["name"], payer["name"], desc, amt, total_amt, self.currency, payer.get("upi_id")
@@ -1618,12 +1758,12 @@ class SplitExpenseApp:
             sms_btn = ttk.Button(
                 btn_box,
                 text="📱 SMS",
-                style="Secondary.TButton",
+                style="Indigo.TButton",
                 command=lambda p=m.get("phone", ""), txt=msg: self._send_sms_with_feedback(p, txt)
             )
             sms_btn.pack(side=tk.LEFT, padx=4)
 
-        ttk.Button(modal, text="Done / Close", style="Secondary.TButton", command=modal.destroy).pack(pady=14)
+        ttk.Button(modal, text="Done / Close", style="Secondary.TButton", command=modal.destroy).pack(pady=12)
 
     def clear_add_expense_form(self):
         self.exp_desc_var.set("")
@@ -1638,7 +1778,7 @@ class SplitExpenseApp:
         top_bar = tk.Frame(self.tab_expenses, bg=self.BG_MAIN)
         top_bar.pack(fill=tk.X, pady=(0, 10))
 
-        ttk.Button(top_bar, text="↻ Refresh List", style="Secondary.TButton", command=self.refresh_expenses_table).pack(side=tk.LEFT, padx=(0, 10))
+        ttk.Button(top_bar, text="⟳ Refresh List", style="Secondary.TButton", command=self.refresh_expenses_table).pack(side=tk.LEFT, padx=(0, 10))
         ttk.Button(top_bar, text="🗑 Delete Selected Expense", style="Danger.TButton", command=self.handle_delete_expense).pack(side=tk.LEFT)
 
         columns = ("id", "date", "desc", "cat", "group", "payer", "amt", "splits")
@@ -1661,6 +1801,10 @@ class SplitExpenseApp:
         self.tree_expenses.column("amt", width=105, anchor=tk.E)
         self.tree_expenses.column("splits", width=260)
 
+        # Alternating row tag colors
+        self.tree_expenses.tag_configure("evenrow", background=self.BG_SURFACE)
+        self.tree_expenses.tag_configure("oddrow", background=self.BG_SURFACE_ALT)
+
         scrollbar = ttk.Scrollbar(self.tab_expenses, orient=tk.VERTICAL, command=self.tree_expenses.yview)
         self.tree_expenses.configure(yscrollcommand=scrollbar.set)
 
@@ -1672,8 +1816,9 @@ class SplitExpenseApp:
             self.tree_expenses.delete(item)
 
         expenses = self.engine.get_expenses(self.current_group_id)
-        for exp in expenses:
+        for idx, exp in enumerate(expenses):
             splits_summary = ", ".join([f"{s['member_name']}: -{self.currency}{s['amount_owed']:.0f}" for s in exp["splits"]])
+            tag = "evenrow" if idx % 2 == 0 else "oddrow"
             self.tree_expenses.insert(
                 "",
                 tk.END,
@@ -1687,6 +1832,7 @@ class SplitExpenseApp:
                     f"{self.currency}{exp['amount']:.2f}",
                     splits_summary,
                 ),
+                tags=(tag,),
             )
 
     def handle_delete_expense(self):
@@ -1727,14 +1873,16 @@ class SplitExpenseApp:
         self.tree_settle_debts.column("to_upi", width=145)
         self.tree_settle_debts.column("amount", width=115, anchor=tk.E)
 
+        self.tree_settle_debts.tag_configure("pending_debt", foreground="#FCD34D")
+
         self.tree_settle_debts.pack(fill=tk.BOTH, expand=True)
 
         debt_btn_bar = tk.Frame(top_frame, bg=self.BG_SURFACE)
         debt_btn_bar.pack(fill=tk.X, pady=(10, 0))
 
         ttk.Button(debt_btn_bar, text="💬 Send WhatsApp Reminder", style="Primary.TButton", command=self.handle_send_whatsapp_reminder).pack(side=tk.LEFT, padx=(0, 8))
-        ttk.Button(debt_btn_bar, text="📱 Send SMS / Text Reminder", style="Secondary.TButton", command=self.handle_send_sms_reminder).pack(side=tk.LEFT, padx=(0, 8))
-        ttk.Button(debt_btn_bar, text="✓ Record Settlement / Payment", style="Secondary.TButton", command=self.handle_record_settlement_dialog).pack(side=tk.LEFT, padx=(0, 8))
+        ttk.Button(debt_btn_bar, text="📱 Send SMS / Text Reminder", style="Indigo.TButton", command=self.handle_send_sms_reminder).pack(side=tk.LEFT, padx=(0, 8))
+        ttk.Button(debt_btn_bar, text="✓ Record Settlement / Payment", style="Amber.TButton", command=self.handle_record_settlement_dialog).pack(side=tk.LEFT, padx=(0, 8))
         ttk.Button(debt_btn_bar, text="📋 Preview Reminder Message", style="Secondary.TButton", command=self.handle_preview_reminder_message).pack(side=tk.LEFT)
 
         bottom_frame = ttk.LabelFrame(self.tab_settlements, text=" Recorded Settlements History ", padding=12)
@@ -1758,6 +1906,8 @@ class SplitExpenseApp:
         self.tree_settle_history.column("mode", width=115)
         self.tree_settle_history.column("notes", width=165)
 
+        self.tree_settle_history.tag_configure("settled_ok", foreground=self.COLOR_EMERALD)
+
         self.tree_settle_history.pack(fill=tk.BOTH, expand=True)
 
     def refresh_settlements_tab(self):
@@ -1777,6 +1927,7 @@ class SplitExpenseApp:
                     d["to_upi"],
                     f"{self.currency}{d['amount']:.2f}",
                 ),
+                tags=("pending_debt",),
             )
 
         for item in self.tree_settle_history.get_children():
@@ -1796,6 +1947,7 @@ class SplitExpenseApp:
                     s["payment_mode"],
                     s["notes"],
                 ),
+                tags=("settled_ok",),
             )
 
     def _get_selected_debt(self):
@@ -1905,11 +2057,11 @@ class SplitExpenseApp:
 
         modal = tk.Toplevel(self.root)
         modal.title(f"Reminder Message Preview • {debt['from_name']}")
-        modal.geometry("520x400")
+        modal.geometry("540x420")
         modal.configure(bg=self.BG_MAIN)
         modal.transient(self.root)
 
-        tk.Label(modal, text=f"Message Preview for {debt['from_name']}:", font=("Helvetica", 11, "bold"), fg=self.ACCENT_CYAN, bg=self.BG_MAIN).pack(anchor=tk.W, padx=16, pady=(14, 6))
+        tk.Label(modal, text=f"Message Preview for {debt['from_name']}:", font=("Helvetica", 11, "bold"), fg=self.COLOR_SKY, bg=self.BG_MAIN).pack(anchor=tk.W, padx=16, pady=(14, 6))
 
         txt_box = scrolledtext.ScrolledText(modal, wrap=tk.WORD, height=12, bg=self.BG_INPUT, fg=self.TEXT_MAIN, insertbackground=self.TEXT_MAIN)
         txt_box.pack(fill=tk.BOTH, expand=True, padx=16, pady=6)
@@ -1967,7 +2119,7 @@ class SplitExpenseApp:
     def _open_settlement_modal(self, debt=None):
         modal = tk.Toplevel(self.root)
         modal.title("Record Payment / Settlement • SplitExpense")
-        modal.geometry("460x380")
+        modal.geometry("480x400")
         modal.configure(bg=self.BG_MAIN)
         modal.transient(self.root)
         modal.grab_set()
@@ -1975,7 +2127,7 @@ class SplitExpenseApp:
         members = self.engine.get_members()
         member_names = [m["name"] for m in members]
 
-        tk.Label(modal, text="Record Payment Settlement", font=("Helvetica", 13, "bold"), fg=self.ACCENT_CYAN, bg=self.BG_MAIN).pack(anchor=tk.W, padx=18, pady=(14, 10))
+        tk.Label(modal, text="✓ Record Payment Settlement", font=("Helvetica", 13, "bold"), fg=self.COLOR_SKY, bg=self.BG_MAIN).pack(anchor=tk.W, padx=18, pady=(14, 10))
 
         form = tk.Frame(modal, bg=self.BG_SURFACE, highlightbackground=self.BORDER_COLOR, highlightthickness=1, padx=16, pady=14)
         form.pack(fill=tk.BOTH, expand=True, padx=18)
@@ -1990,7 +2142,7 @@ class SplitExpenseApp:
         to_combo = ttk.Combobox(form, textvariable=to_var, values=member_names, state="readonly", width=22)
         to_combo.grid(row=1, column=1, sticky=tk.W, pady=6)
 
-        tk.Label(form, text="Amount:", fg=self.TEXT_MAIN, bg=self.BG_SURFACE).grid(row=2, column=0, sticky=tk.W, pady=6)
+        tk.Label(form, text="Amount:", fg=self.COLOR_EMERALD, bg=self.BG_SURFACE, font=("Helvetica", 10, "bold")).grid(row=2, column=0, sticky=tk.W, pady=6)
         amt_var = tk.StringVar(value=f"{debt['amount']:.2f}" if debt else "")
         ttk.Entry(form, textvariable=amt_var, width=15).grid(row=2, column=1, sticky=tk.W, pady=6)
 
@@ -2046,7 +2198,7 @@ class SplitExpenseApp:
         mem_btn_bar.pack(fill=tk.X, pady=(0, 10))
 
         ttk.Button(mem_btn_bar, text="➕ Add Member", style="Primary.TButton", command=self.handle_add_member_dialog).pack(side=tk.LEFT, padx=(0, 6))
-        ttk.Button(mem_btn_bar, text="✏ Edit Member", style="Secondary.TButton", command=self.handle_edit_member_dialog).pack(side=tk.LEFT, padx=(0, 6))
+        ttk.Button(mem_btn_bar, text="✏ Edit Member", style="Indigo.TButton", command=self.handle_edit_member_dialog).pack(side=tk.LEFT, padx=(0, 6))
         ttk.Button(mem_btn_bar, text="🗑 Delete", style="Danger.TButton", command=self.handle_delete_member).pack(side=tk.LEFT)
 
         columns_m = ("id", "name", "phone", "email", "upi")
@@ -2063,6 +2215,9 @@ class SplitExpenseApp:
         self.tree_members.column("email", width=125)
         self.tree_members.column("upi", width=115)
 
+        self.tree_members.tag_configure("evenrow", background=self.BG_SURFACE)
+        self.tree_members.tag_configure("oddrow", background=self.BG_SURFACE_ALT)
+
         self.tree_members.pack(fill=tk.BOTH, expand=True)
 
         right_col = ttk.LabelFrame(container, text=" Groups Management ", padding=12)
@@ -2071,8 +2226,8 @@ class SplitExpenseApp:
         grp_btn_bar = tk.Frame(right_col, bg=self.BG_SURFACE)
         grp_btn_bar.pack(fill=tk.X, pady=(0, 10))
 
-        ttk.Button(grp_btn_bar, text="➕ Add Group", style="Primary.TButton", command=self.handle_add_group_dialog).pack(side=tk.LEFT, padx=(0, 6))
-        ttk.Button(grp_btn_bar, text="👥 Manage Group Members", style="Secondary.TButton", command=self.handle_manage_group_members_dialog).pack(side=tk.LEFT)
+        ttk.Button(grp_btn_bar, text="➕ Add Group", style="Purple.TButton", command=self.handle_add_group_dialog).pack(side=tk.LEFT, padx=(0, 6))
+        ttk.Button(grp_btn_bar, text="👥 Manage Group Members", style="Cyan.TButton", command=self.handle_manage_group_members_dialog).pack(side=tk.LEFT)
 
         columns_g = ("id", "name", "desc")
         self.tree_groups = ttk.Treeview(right_col, columns=columns_g, show="headings", height=14)
@@ -2084,18 +2239,23 @@ class SplitExpenseApp:
         self.tree_groups.column("name", width=135)
         self.tree_groups.column("desc", width=185)
 
+        self.tree_groups.tag_configure("evenrow", background=self.BG_SURFACE)
+        self.tree_groups.tag_configure("oddrow", background=self.BG_SURFACE_ALT)
+
         self.tree_groups.pack(fill=tk.BOTH, expand=True)
 
     def refresh_members_tab(self):
         for item in self.tree_members.get_children():
             self.tree_members.delete(item)
-        for m in self.engine.get_members():
-            self.tree_members.insert("", tk.END, values=(m["id"], m["name"], m["phone"], m["email"], m["upi_id"]))
+        for idx, m in enumerate(self.engine.get_members()):
+            tag = "evenrow" if idx % 2 == 0 else "oddrow"
+            self.tree_members.insert("", tk.END, values=(m["id"], m["name"], m["phone"], m["email"], m["upi_id"]), tags=(tag,))
 
         for item in self.tree_groups.get_children():
             self.tree_groups.delete(item)
-        for g in self.engine.get_groups():
-            self.tree_groups.insert("", tk.END, values=(g["id"], g["name"], g["description"]))
+        for idx, g in enumerate(self.engine.get_groups()):
+            tag = "evenrow" if idx % 2 == 0 else "oddrow"
+            self.tree_groups.insert("", tk.END, values=(g["id"], g["name"], g["description"]), tags=(tag,))
 
     def handle_add_member_dialog(self):
         self._open_member_modal(None)
@@ -2112,7 +2272,7 @@ class SplitExpenseApp:
     def _open_member_modal(self, member=None):
         modal = tk.Toplevel(self.root)
         modal.title("Add New Member • SplitExpense" if not member else "Edit Member • SplitExpense")
-        modal.geometry("460x400")
+        modal.geometry("480x420")
         modal.configure(bg=self.BG_MAIN)
         modal.transient(self.root)
         modal.grab_set()
@@ -2120,7 +2280,7 @@ class SplitExpenseApp:
         form = tk.Frame(modal, bg=self.BG_SURFACE, highlightbackground=self.BORDER_COLOR, highlightthickness=1, padx=18, pady=16)
         form.pack(fill=tk.BOTH, expand=True, padx=18, pady=(16, 10))
 
-        tk.Label(form, text="Member Details", font=("Helvetica", 12, "bold"), fg=self.ACCENT_CYAN, bg=self.BG_SURFACE).grid(row=0, column=0, columnspan=2, sticky=tk.W, pady=(0, 12))
+        tk.Label(form, text="Member Details", font=("Helvetica", 12, "bold"), fg=self.COLOR_SKY, bg=self.BG_SURFACE).grid(row=0, column=0, columnspan=2, sticky=tk.W, pady=(0, 12))
 
         tk.Label(form, text="Full Name *:", fg=self.TEXT_MAIN, bg=self.BG_SURFACE).grid(row=1, column=0, sticky=tk.W, pady=6)
         name_var = tk.StringVar(value=member["name"] if member else "")
@@ -2134,7 +2294,7 @@ class SplitExpenseApp:
         email_var = tk.StringVar(value=member["email"] if member else "")
         ttk.Entry(form, textvariable=email_var, width=28).grid(row=3, column=1, sticky=tk.W, pady=6)
 
-        tk.Label(form, text="UPI ID (for payments):", fg=self.TEXT_MAIN, bg=self.BG_SURFACE).grid(row=4, column=0, sticky=tk.W, pady=6)
+        tk.Label(form, text="UPI ID (for payments):", fg=self.COLOR_SKY, bg=self.BG_SURFACE, font=("Helvetica", 10, "bold")).grid(row=4, column=0, sticky=tk.W, pady=6)
         upi_var = tk.StringVar(value=member["upi_id"] if member else "")
         ttk.Entry(form, textvariable=upi_var, width=28).grid(row=4, column=1, sticky=tk.W, pady=6)
 
@@ -2185,7 +2345,7 @@ class SplitExpenseApp:
     def handle_add_group_dialog(self):
         modal = tk.Toplevel(self.root)
         modal.title("Add New Group • SplitExpense")
-        modal.geometry("420x280")
+        modal.geometry("440x290")
         modal.configure(bg=self.BG_MAIN)
         modal.transient(self.root)
         modal.grab_set()
@@ -2193,7 +2353,7 @@ class SplitExpenseApp:
         form = tk.Frame(modal, bg=self.BG_SURFACE, highlightbackground=self.BORDER_COLOR, highlightthickness=1, padx=18, pady=16)
         form.pack(fill=tk.BOTH, expand=True, padx=18, pady=(16, 10))
 
-        tk.Label(form, text="Create New Group", font=("Helvetica", 12, "bold"), fg=self.ACCENT_CYAN, bg=self.BG_SURFACE).grid(row=0, column=0, columnspan=2, sticky=tk.W, pady=(0, 12))
+        tk.Label(form, text="Create New Group", font=("Helvetica", 12, "bold"), fg=self.COLOR_SKY, bg=self.BG_SURFACE).grid(row=0, column=0, columnspan=2, sticky=tk.W, pady=(0, 12))
 
         tk.Label(form, text="Group Name *:", fg=self.TEXT_MAIN, bg=self.BG_SURFACE).grid(row=1, column=0, sticky=tk.W, pady=6)
         name_var = tk.StringVar()
@@ -2230,12 +2390,12 @@ class SplitExpenseApp:
 
         modal = tk.Toplevel(self.root)
         modal.title(f"Manage Members • {gname}")
-        modal.geometry("420x440")
+        modal.geometry("440x460")
         modal.configure(bg=self.BG_MAIN)
         modal.transient(self.root)
         modal.grab_set()
 
-        tk.Label(modal, text=f"Members in '{gname}'", font=("Helvetica", 12, "bold"), fg=self.ACCENT_CYAN, bg=self.BG_MAIN).pack(anchor=tk.W, padx=18, pady=(14, 8))
+        tk.Label(modal, text=f"Members in '{gname}'", font=("Helvetica", 12, "bold"), fg=self.COLOR_SKY, bg=self.BG_MAIN).pack(anchor=tk.W, padx=18, pady=(14, 8))
 
         all_members = self.engine.get_members()
         current_members = {m["id"] for m in self.engine.get_group_members(gid)}
@@ -2361,6 +2521,9 @@ class SplitExpenseApp:
         self.kpi_total_spent.val_lbl.config(text=f"{self.currency}{total_spent:,.2f}")
         self.kpi_total_expenses.val_lbl.config(text=str(len(expenses)))
 
+        all_members = self.engine.get_group_members(self.current_group_id) if self.current_group_id else self.engine.get_members()
+        self.kpi_members_count.val_lbl.config(text=str(len(all_members)))
+
         for item in self.tree_balances.get_children():
             self.tree_balances.delete(item)
 
@@ -2370,10 +2533,13 @@ class SplitExpenseApp:
             sign = "+" if net > 0 else ""
             if net > 0.01:
                 status_text = f"Gets back {self.currency}{net:,.2f}"
+                tag = "positive"
             elif net < -0.01:
                 status_text = f"Owes {self.currency}{-net:,.2f}"
+                tag = "negative"
             else:
                 status_text = "Settled Up"
+                tag = "settled"
 
             settled_net = b["settled_paid"] - b["settled_recv"]
             settled_str = f"{self.currency}{settled_net:,.2f}" if abs(settled_net) > 0.01 else "—"
@@ -2389,6 +2555,7 @@ class SplitExpenseApp:
                     f"{sign}{self.currency}{net:,.2f}",
                     status_text,
                 ),
+                tags=(tag,),
             )
 
         for item in self.tree_plan.get_children():
@@ -2408,6 +2575,7 @@ class SplitExpenseApp:
                     f"{self.currency}{p['amount']:,.2f}",
                     "Pending",
                 ),
+                tags=("debt_row",),
             )
 
     def set_status(self, text):

@@ -1,60 +1,51 @@
-# ⚡ SplitExpense - Android App & APK Build Guide
+# 📱 Financial Flow & Wealth Stability Planner - Android Mobile App
 
-This directory contains the complete Android mobile application for **SplitExpense**, built with **Kivy** and ready for packaging into an installable `.apk` file using **Buildozer** and **GitHub Actions**.
-
----
-
-## 📱 Mobile App Highlights
-- **Mobile Dark Mode UI**: Deep `#0F172A` theme optimized for OLED/AMOLED smartphone displays.
-- **Smart Allocation Engine**: Full to One, Paid for Others (Exclude Payer), Shared Equally, and Exact amounts.
-- **1-Tap WhatsApp Reminders**: Direct `https://wa.me/` deep links with pre-filled debt details and UPI handles.
-- **1-Tap UPI Payment Intents**: Direct `upi://pay?pa=...` links that trigger Google Pay, PhonePe, Paytm, or BHIM on Android.
-- **Offline SQLite Database**: Automatically saves all expenses, groups, and settlements locally on the phone.
+This directory contains the production-grade Android mobile application for the **Financial Flow & Wealth Stability Planner**, built with **Kivy** and packaged for automatic compilation into an installable `.apk` file using **Buildozer** and **GitHub Actions**.
 
 ---
 
-## 🚀 How to Get the `.apk` File (Free via GitHub Actions)
+## ⚡ Mobile Highlights
 
-Because building an Android APK requires the full Android SDK (~5 GB), NDK, and Linux toolchains, we configured a cloud builder via **GitHub Actions** (`.github/workflows/build-apk.yml`).
+- **Adaptive Screen Aspect Ratio**:
+  - Dynamically adapts across all smartphone display aspect ratios (`16:9`, `18:9`, `19.5:9`, `20:9`, `21:9`) with density-independent scaling (`dp`, `sp`).
+  - Native notch & status bar padding so inputs are never clipped behind camera cutouts or dynamic islands.
+  - Soft-keyboard handling (`below_target`) prevents the on-screen Android keyboard from obscuring numeric entry boxes.
+- **AMOLED Pitch Dark Theme**:
+  - High-contrast pure black (`#000000`) & dark obsidian background with glowing neon accents (Electric Cyan, Emerald Green, Neon Rose, Gold).
+- **Offline SQLite Database (`financial_flow.db`)**:
+  - Automatically saves all entered incomes, multi-loans, credit cards, investments, term insurance, and expenses directly to local SQLite storage on the Android device.
+  - Remembers all inputs across app launches so you never have to re-enter data.
+- **Multi-Loan Amortization Engine**:
+  - Track Primary Home Loans, Top-Ups, Vehicle, and Personal loans with paid % and leftover balances.
+- **Credit Card Limit & Utilization Gauges**:
+  - Real-time card limits, monthly balances, utilization %, active EMI installment tracking, and debt freedom dates.
+- **Retirement & Term Insurance Adequacy**:
+  - Track EPF, NPS, ULIP, SIP, FD/RD, plus a dedicated Term Life Insurance assessment comparing your life cover against the standard 10x–15x annual income benchmark.
+- **Interactive What-If Optimizer**:
+  - Real-time slider simulating how cutting discretionary expenses frees monthly cash flow and accelerates 5-year wealth compounding.
 
-### Step 1: Push this project to GitHub
-If you haven't initialized Git yet:
+---
+
+## 🚀 How to Get the `.apk` File (Built via GitHub Actions)
+
+Because building an Android APK requires the full Android SDK (~5 GB), NDK, and Linux cross-compilation toolchains, cloud compilation is automated via **GitHub Actions** (`.github/workflows/build-apk.yml`).
+
+### Step 1: Push Code to GitHub
+Whenever you push to the repository:
 ```bash
-git init
 git add .
-git commit -m "Add SplitExpense mobile app and APK build workflow"
-```
-Create a new repository on [GitHub](https://github.com/new) and push your code:
-```bash
-git remote add origin https://github.com/<YOUR_USERNAME>/<YOUR_REPO_NAME>.git
-git branch -M main
-git push -u origin main
+git commit -m "Update Financial Flow Mobile App"
+git push origin main
 ```
 
-### Step 2: Trigger the APK Build
-1. Go to your GitHub repository in your browser.
+### Step 2: Cloud APK Compilation
+1. Go to your repository on [GitHub](https://github.com/HBagwe/theArcShadow).
 2. Click on the **Actions** tab at the top.
-3. Select **"Build SplitExpense Android APK"** from the left sidebar.
-4. Click **"Run workflow"** ➔ **Run workflow**.
+3. The workflow **"Build Financial Flow Android APK"** starts running automatically.
+4. Compilation takes ~8–12 minutes on GitHub's Ubuntu runner.
 
-### Step 3: Download the `.apk` File
-1. Once the workflow run completes (typically 8–12 minutes for the initial build), click on the completed run.
-2. Under the **Artifacts** section at the bottom of the page, click on **`SplitExpense-Android-APK`**.
-3. It will download a zip file containing `splitexpense-1.0.0-arm64-v8a-debug.apk`.
-
-### Step 4: Install on Your Android Phone
-1. Transfer the `.apk` to your Android device (via WhatsApp, Google Drive, USB, or email).
-2. Tap the `.apk` file to install.
-3. If prompted, toggle on *"Allow from this source"* (standard for sideloading `.apk` files outside Google Play).
-4. Launch **SplitExpense** and enjoy!
-
----
-
-## 💻 Optional: Local Build (Linux / Docker)
-If you prefer building locally:
-```bash
-cd android_app
-pip install --upgrade buildozer cython
-buildozer android debug
-```
-The resulting `.apk` will be output to `android_app/bin/`.
+### Step 3: Download & Install
+1. Once the workflow completes, open the workflow run.
+2. Under **Artifacts** at the bottom, click on **`FinancialFlow-Android-APK`**.
+3. Transfer the downloaded `.apk` to your Android device (via WhatsApp, Google Drive, or USB).
+4. Tap the APK to install on your phone!
